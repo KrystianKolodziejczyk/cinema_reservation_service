@@ -1,0 +1,17 @@
+services:
+  app:
+    build: .
+    ports:
+      - 8000:8000
+  db:
+    container_name: cinema_database
+    image: postgres:18-alpine
+    env_file:
+       - .env
+    ports:
+      - 5432:5432 # TODO: zmień na zgodne z apache
+    volumes:
+      - pgdata:/var/lib/posgresql
+
+volumes:
+  pgdata:
