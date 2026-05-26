@@ -1,0 +1,23 @@
+from typing import TYPE_CHECKING
+
+from shared.database_conn.base_orm import Base
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+if TYPE_CHECKING:
+    from app.modules.cinema.infrastructure.orm import ReservationORM, SeatORM
+
+
+class ReservedSeatORM(Base):
+    __tablename__ = "reserved_seats"
+
+    reservation_id: Mapped[int] = mapped_column(
+        ForeignKey("reservations.reservation_id", ondelete="CASCADE"), primary_key=True
+    )
+    seat_id: Mapped[int] = mapped_column(
+        ForeignKey("seats.seat_id", ondelete="SET NULL"), primary_key=True
+    )
+    price_paid: Mapped[float]
+
+    reservation: Mapped[ReservationORM] = relationship(back_populates="reserved_seats")
+    seat: Mapped[SeatORM] = relationship(back_populates="reserved_seats")

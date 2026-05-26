@@ -1,7 +1,12 @@
-from shared.db_client.base_orm import Base
+from typing import TYPE_CHECKING
+
+from shared.database_conn.base_orm import Base
 from sqlalchemy import CheckConstraint, Index
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import String
+
+if TYPE_CHECKING:
+    from app.modules.cinema.infrastructure.orm.screening_orm import ScreeningORM
 
 
 class MovieORM(Base):
@@ -15,6 +20,8 @@ class MovieORM(Base):
     genre: Mapped[str] = mapped_column(String(50))
     rating: Mapped[float | None] = mapped_column(default=None)
     poster_url: Mapped[str | None] = mapped_column(default=None)
+
+    screenings: Mapped[list[ScreeningORM]] = relationship(back_populates="movie")
 
     __table_args__ = (
         Index("idx_movie_title", "title"),
