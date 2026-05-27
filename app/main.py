@@ -6,7 +6,7 @@ from app.modules.auth.presentation.routers.v1.auth_router import router as auth_
 
 app = FastAPI()
 
-app.include_router(auth_router)
+app.include_router(auth_router, prefix="/api")
 
 if __name__ == "__main__":
     app()
