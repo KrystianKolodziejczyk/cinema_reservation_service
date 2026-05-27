@@ -1,6 +1,12 @@
-import asyncio
+from fastapi import FastAPI
 
-from app.modules.shared.database_conn.database_client import create_tables
+from app.modules.auth.presentation.routers.v1.auth_router import router as auth_router
+
+# ==================
+
+app = FastAPI()
+
+app.include_router(auth_router)
 
 if __name__ == "__main__":
-    asyncio.run(create_tables())
+    app()
