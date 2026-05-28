@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy import CheckConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.modules.auth.infrastructure.orm.refresh_token_orm import RefreshTokenORM
 from app.modules.shared.database_conn.base_orm import Base
 
 if TYPE_CHECKING:
@@ -21,6 +22,7 @@ class UserORM(Base):
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     reservations: Mapped[list[ReservationORM]] = relationship(back_populates="user")
+    refresh_tokens: Mapped[list[RefreshTokenORM]] = relationship(back_populates="user")
 
     __table_args__ = (
         CheckConstraint("LENGTH(first_name) > 2", name="ck_user_first_name"),
