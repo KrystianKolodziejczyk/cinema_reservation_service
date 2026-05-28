@@ -1,10 +1,13 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, Index, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.modules.auth.infrastructure.orm import UserORM
 from app.modules.shared.database_conn.base_orm import Base
+
+if TYPE_CHECKING:
+    from app.modules.auth.infrastructure.orm import UserORM
 
 
 class RefreshTokenORM(Base):

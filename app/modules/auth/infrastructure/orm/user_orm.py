@@ -4,10 +4,10 @@ from typing import TYPE_CHECKING
 from sqlalchemy import CheckConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.modules.auth.infrastructure.orm.refresh_token_orm import RefreshTokenORM
 from app.modules.shared.database_conn.base_orm import Base
 
 if TYPE_CHECKING:
+    from app.modules.auth.infrastructure.orm.refresh_token_orm import RefreshTokenORM
     from app.modules.cinema.infrastructure.orm import ReservationORM
 
 
