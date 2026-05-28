@@ -18,7 +18,7 @@ class AuthService(IAuthService):
             "sub": str(user_id),
             "role": role,
             "iat": datetime.now().timestamp(),
-            "exp": datetime.now().timestamp() + timedelta(minutes=15),
+            "exp": (datetime.now() + timedelta(minutes=15)).timestamp(),
         }
         return jwt.encode(payload=payload, key="example_secret_key", algorithm="HS256")
 
@@ -26,7 +26,7 @@ class AuthService(IAuthService):
         payload = {
             "sub": str(user_id),
             "iat": datetime.now().timestamp(),
-            "exp": datetime.now().timestamp() + timedelta(days=7),
+            "exp": (datetime.now() + timedelta(days=7)).timestamp(),
         }
         return jwt.encode(
             payload=payload, key="example_secret_key", algorithm="HS256"

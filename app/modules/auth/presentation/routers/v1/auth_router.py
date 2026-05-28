@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 
 from app.modules.auth.application.dto import RegisterUserDTO
 from app.modules.auth.application.service.auth_service import AuthService
@@ -13,9 +13,9 @@ router = APIRouter(prefix="/v1/auth")
 # ===============
 
 
-@router.post("/register")
+@router.post("/register", status_code=status.HTTP_204_NO_CONTENT)
 async def register_user(
     body: RegisterUserRequest, service: AuthService = Depends(get_auth_service)
 ):
     dto = RegisterUserDTO(**body.model_dump())
-    service.register_user(dto=dto)
+    await service.register_user(dto=dto)

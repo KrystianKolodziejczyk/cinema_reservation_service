@@ -1,22 +1,15 @@
+import os
 from collections.abc import AsyncGenerator
 
-from sqlalchemy import URL
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 import app.modules.auth.infrastructure.orm  # noqa
 import app.modules.cinema.infrastructure.orm  # noqa
 from app.modules.shared.database_conn.base_orm import Base
 
-url_object = URL.create(
-    "postgresql+asyncpg",
-    username="user",
-    password="pass",
-    host="localhost",
-    port=8000,
-    database="cinema_database",
-)
+DATABASE_URL = os.environ["DATABASE_URL"]
 
-engine = create_async_engine(url=url_object, echo=True)
+engine = create_async_engine(url=DATABASE_URL, echo=True)
 
 async_session = async_sessionmaker(
     bind=engine, class_=AsyncSession, expire_on_commit=False

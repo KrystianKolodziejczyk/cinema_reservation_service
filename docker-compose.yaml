@@ -12,6 +12,8 @@ services:
     build: .
     expose:
       - 8080
+    env_file:
+      - .env
   db:
     container_name: cinema_database
     image: postgres:18-alpine
