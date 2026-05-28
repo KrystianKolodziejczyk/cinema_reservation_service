@@ -22,7 +22,7 @@ select = [
     # isort
     "I",
 ]
-
+ignore = ["B008"]
 
 [tool.ruff]
 line-length = 88
