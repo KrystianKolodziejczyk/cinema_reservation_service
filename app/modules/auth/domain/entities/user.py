@@ -25,7 +25,10 @@ class User:
     def compare_passwords(self, password_repeat: str) -> bool:
         return self._password == password_repeat
 
-    def hash_password(self) -> str:
-        return bcrypt.hashpw(
+    def hash_password(self) -> None:
+        self._password = bcrypt.hashpw(
             password=self._password.encode(), salt=bcrypt.gensalt()
         ).decode()
+
+    def verify_password(self, *, raw_password: str) -> bool:
+        return bcrypt.checkpw(raw_password.encode(), self._password.encode())

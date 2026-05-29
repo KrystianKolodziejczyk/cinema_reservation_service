@@ -1,6 +1,12 @@
 from abc import ABC, abstractmethod
 
+from app.modules.auth.application.dto import RegisterUserDTO
+from app.modules.auth.application.dto.login_dto import LoginDTO
+
 
 class IAuthService(ABC):
     @abstractmethod
-    async def register_user(self, dto) -> None: ...
+    async def register_user(self, dto: RegisterUserDTO) -> dict[str, str]: ...
+
+    @abstractmethod
+    async def login(self, dto: LoginDTO) -> dict[str, str]: ...

@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import jwt
 
 from app.modules.auth.application.dto import RegisterUserDTO
+from app.modules.auth.application.dto.login_dto import LoginDTO
 from app.modules.auth.application.interface import IAuthService
 from app.modules.auth.domain.entities.refresh_token import RefreshToken
 from app.modules.auth.domain.entities.user import User
@@ -58,5 +59,25 @@ class AuthService(IAuthService):
         )
 
         await self._repository.save_refresh_token(refresh_token_entity)
+
+        return {"access_token": access_token, "refresh_token": refresh_token_str}
+
+    async def login(self, dto: LoginDTO) -> dict[str, str]:
+        user = await self._repository.fetch_password(email=dto.email)
+
+        if not user.verify_password(raw_password=dto.password):
+            pass  # TODO: dodaj raise
+
+        access_token = self._create_access_token(user_id=user._user_id, role="client")
+        refresh_token_str, exp = self._create_refresh_token(user_id=user._user_id)
+
+        await self._repository.save_refresh_token(
+            refresh_token=RefreshToken(
+                refresh_token_id=None,
+                user_id=user._user_id,
+                token_hash=refresh_token_str,
+                expires_at=exp,
+            )
+        )
 
         return {"access_token": access_token, "refresh_token": refresh_token_str}

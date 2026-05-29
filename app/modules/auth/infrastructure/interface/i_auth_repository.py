@@ -10,3 +10,6 @@ class IAuthRepository(ABC):
 
     @abstractmethod
     async def save_refresh_token(self, refresh_token: RefreshToken) -> None: ...
+
+    @abstractmethod
+    async def fetch_password(self, email: str) -> User: ...

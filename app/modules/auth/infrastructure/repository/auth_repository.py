@@ -1,5 +1,6 @@
 from dataclasses import asdict
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.auth.domain.entities.refresh_token import RefreshToken
@@ -30,3 +31,14 @@ class AuthRepository(IAuthRepository):
         refresh_token_orm = RefreshTokenORM(**asdict(refresh_token))
         self._session.add(refresh_token_orm)
         await self._session.flush()
+
+    async def fetch_password(self, email: str) -> User:
+        stmt = select(UserORM).where(UserORM.email == email)
+        user_orm = await self._session.scalar(stmt)
+        return User(
+            user_id=user_orm.user_id,
+            email=user_orm.email,
+            password=user_orm.password_hash,
+            first_name=user_orm.first_name,
+            last_name=user_orm.last_name,
+        )  # TODO: dodaj mappery
