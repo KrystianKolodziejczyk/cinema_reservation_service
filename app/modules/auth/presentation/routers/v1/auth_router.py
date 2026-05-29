@@ -6,6 +6,9 @@ from app.modules.auth.presentation.dependencies.auth_deps import get_auth_servic
 from app.modules.auth.presentation.schemas.requests import (
     RegisterUserRequest,
 )
+from app.modules.auth.presentation.schemas.responses import (
+    RegisterUserResponse,
+)
 
 router = APIRouter(prefix="/v1/auth")
 
@@ -13,9 +16,14 @@ router = APIRouter(prefix="/v1/auth")
 # ===============
 
 
-@router.post("/register", status_code=status.HTTP_204_NO_CONTENT)
+@router.post(
+    "/register",
+    status_code=status.HTTP_201_CREATED,
+    response_model=RegisterUserResponse,
+)
 async def register_user(
     body: RegisterUserRequest, service: AuthService = Depends(get_auth_service)
-):
+) -> RegisterUserResponse:
     dto = RegisterUserDTO(**body.model_dump())
-    await service.register_user(dto=dto)
+    tokens = await service.register_user(dto=dto)
+    return RegisterUserResponse(**tokens)
