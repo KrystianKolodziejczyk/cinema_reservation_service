@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -33,8 +35,8 @@ class ReservationORM(Base):
     )
 
     __table_args__ = (
-        Index("idx_user_id", "user_id"),
-        Index("idx_screening_id", "screening_id"),
+        Index("idx_reservations_user_id", "user_id"),
+        Index("idx_reservations_screening_id", "screening_id"),
         CheckConstraint(
             "status IN ('pending', 'confirmed', 'cancelled', 'expired')",
             name="ck_reservation_status",

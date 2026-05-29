@@ -7,6 +7,7 @@ from app.modules.auth.application.interface import IAuthService
 from app.modules.auth.domain.entities.refresh_token import RefreshToken
 from app.modules.auth.domain.entities.user import User
 from app.modules.auth.infrastructure.interface import IAuthRepository
+from app.modules.shared.config.settings import settings
 
 
 class AuthService(IAuthService):
@@ -20,17 +21,17 @@ class AuthService(IAuthService):
             "iat": datetime.now().timestamp(),
             "exp": (datetime.now() + timedelta(minutes=15)).timestamp(),
         }
-        return jwt.encode(payload=payload, key="example_secret_key", algorithm="HS256")
+        return jwt.encode(payload=payload, key=settings.secret_key, algorithm="HS256")
 
-    def _create_refresh_token(self, user_id: int) -> tuple[str | datetime, ...]:
+    def _create_refresh_token(self, user_id: int) -> tuple[str, datetime]:
+        exp_dt = datetime.now() + timedelta(days=7)
         payload = {
             "sub": str(user_id),
             "iat": datetime.now().timestamp(),
-            "exp": (datetime.now() + timedelta(days=7)).timestamp(),
+            "exp": exp_dt.timestamp(),
         }
-        return jwt.encode(
-            payload=payload, key="example_secret_key", algorithm="HS256"
-        ), payload["exp"]
+        token = jwt.encode(payload=payload, key=settings.secret_key, algorithm="HS256")
+        return token, exp_dt
 
     async def register_user(self, dto: RegisterUserDTO) -> None:
         user = User(
@@ -59,7 +60,3 @@ class AuthService(IAuthService):
         await self._repository.save_refresh_token(refresh_token)
 
         return {"access_token": access_token, "refresh_token": refresh_token}
-
-
-# zrozum później jak powinna wyglądać autoryzajca
-# + dowiedz się co zrobić żeby JWT był zawsze taki sam do Bruno

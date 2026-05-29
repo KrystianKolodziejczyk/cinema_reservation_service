@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -21,4 +23,4 @@ class RefreshTokenORM(Base):
 
     user: Mapped[UserORM] = relationship(back_populates="refresh_tokens")
 
-    __table_args__ = (Index("idx_user_id", "user_id"),)
+    __table_args__ = (Index("idx_refresh_tokens_user_id", "user_id"),)
