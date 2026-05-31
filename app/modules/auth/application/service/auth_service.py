@@ -83,4 +83,26 @@ class AuthService(IAuthService):
         return {"access_token": access_token, "refresh_token": refresh_token_str}
 
     async def logout(self, user_id: int) -> None:
-        await self._repository.revoke_refresh_token(user_id=user_id)
+        await self._repository.delete_refresh_token(user_id=user_id)
+
+    async def refresh(self, user_id: int, token: str) -> dict[str, str]:
+        result = await self._repository.fetch_refresh_token_id(
+            user_id=user_id, token=token
+        )
+        if not result:
+            raise ValueError("CHANGE IT ASASP")  # TODO: zmień
+        await self._repository.delete_refresh_token(user_id=user_id)
+
+        access_token = self._create_access_token(user_id=user_id, role="client")
+        refresh_token, exp = self._create_refresh_token(user_id=user_id)
+
+        await self._repository.save_refresh_token(
+            refresh_token=RefreshToken(
+                refresh_token_id=None,
+                user_id=user_id,
+                token_hash=refresh_token,
+                expires_at=exp,
+            )
+        )
+
+        return {"access_token": access_token, "refresh_token": refresh_token}

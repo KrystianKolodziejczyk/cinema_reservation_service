@@ -43,6 +43,14 @@ class AuthRepository(IAuthRepository):
             last_name=user_orm.last_name,
         )  # TODO: dodaj mappery
 
-    async def revoke_refresh_token(self, user_id: int) -> None:
+    async def delete_refresh_token(self, user_id: int) -> None:
         stmt = delete(RefreshTokenORM).where(RefreshTokenORM.user_id == user_id)
         await self._session.execute(stmt)
+
+    async def fetch_refresh_token_id(self, user_id: int, token: str) -> int | None:
+        stmt = select(RefreshTokenORM.refresh_token_id).where(
+            RefreshTokenORM.user_id == user_id, RefreshTokenORM.token_hash == token
+        )
+        result = await self._session.scalar(stmt)
+
+        return result

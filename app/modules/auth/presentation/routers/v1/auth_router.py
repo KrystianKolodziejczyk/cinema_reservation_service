@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 
 from app.modules.auth.application.dto import RegisterUserDTO
 from app.modules.auth.application.dto.login_dto import LoginDTO
@@ -12,6 +12,9 @@ from app.modules.auth.presentation.schemas.responses import (
     RegisterUserResponse,
 )
 from app.modules.auth.presentation.schemas.responses.login_response import LoginResponse
+from app.modules.auth.presentation.schemas.responses.refresh_response import (
+    RefreshResponse,
+)
 from app.modules.shared.dependencies.auth_deps import get_current_user
 
 router = APIRouter(prefix="/v1/auth")
@@ -50,3 +53,14 @@ async def logout(
     user_id: int = Depends(get_current_user),
 ) -> None:
     await service.logout(user_id)
+
+
+@router.post("/refresh", status_code=status.HTTP_200_OK, response_model=RefreshResponse)
+async def refresh(
+    request: Request,
+    service: IAuthService = Depends(get_auth_service),
+    user_id: int = Depends(get_current_user),
+) -> RefreshResponse:
+    token = request.headers.get("Authorization")
+    tokens = await service.refresh(user_id=user_id, token=token)
+    return RefreshResponse(**tokens)

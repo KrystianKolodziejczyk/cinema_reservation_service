@@ -13,3 +13,6 @@ class IAuthService(ABC):
 
     @abstractmethod
     async def logout(self, user_id: int) -> None: ...
+
+    @abstractmethod
+    async def refresh(self, user_id: int, token: str) -> dict[str, str]: ...
