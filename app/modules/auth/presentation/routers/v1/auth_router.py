@@ -12,6 +12,7 @@ from app.modules.auth.presentation.schemas.responses import (
     RegisterUserResponse,
 )
 from app.modules.auth.presentation.schemas.responses.login_response import LoginResponse
+from app.modules.shared.dependencies.auth_deps import get_current_user
 
 router = APIRouter(prefix="/v1/auth")
 
@@ -40,5 +41,12 @@ async def login(
 ) -> LoginResponse:
     dto = LoginDTO(**body.model_dump())
     tokens = await service.login(dto=dto)
-
     return LoginResponse(**tokens)
+
+
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+async def logout(
+    service: IAuthService = Depends(get_auth_service),
+    user_id: int = Depends(get_current_user),
+) -> None:
+    await service.logout(user_id)

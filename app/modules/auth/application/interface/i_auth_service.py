@@ -10,3 +10,6 @@ class IAuthService(ABC):
 
     @abstractmethod
     async def login(self, dto: LoginDTO) -> dict[str, str]: ...
+
+    @abstractmethod
+    async def logout(self, user_id: int) -> None: ...

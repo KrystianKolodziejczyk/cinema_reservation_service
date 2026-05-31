@@ -81,3 +81,6 @@ class AuthService(IAuthService):
         )
 
         return {"access_token": access_token, "refresh_token": refresh_token_str}
+
+    async def logout(self, user_id: int) -> None:
+        await self._repository.revoke_refresh_token(user_id=user_id)
