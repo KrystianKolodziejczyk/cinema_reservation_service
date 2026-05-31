@@ -20,7 +20,7 @@ from app.modules.shared.dependencies.auth_deps import get_current_user
 router = APIRouter(prefix="/v1/auth")
 
 
-# ===============
+# =================
 
 
 @router.post(

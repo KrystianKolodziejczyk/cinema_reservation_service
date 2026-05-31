@@ -4,6 +4,13 @@ import jwt
 
 from app.modules.auth.application.dto import RegisterUserDTO
 from app.modules.auth.application.dto.login_dto import LoginDTO
+from app.modules.auth.application.exceptions import DifferentPasswordsError
+from app.modules.auth.application.exceptions.refresh_token_not_found_error import (
+    RefreshTokenNotFoundError,
+)
+from app.modules.auth.application.exceptions.wrong_password_error import (
+    WrongPasswordError,
+)
 from app.modules.auth.application.interface import IAuthService
 from app.modules.auth.domain.entities.refresh_token import RefreshToken
 from app.modules.auth.domain.entities.user import User
@@ -43,7 +50,9 @@ class AuthService(IAuthService):
             last_name=dto.last_name,
         )
         if not user.compare_passwords(password_repeat=dto.password_repeat):
-            pass  # TODO: dodaj raise
+            raise DifferentPasswordsError(
+                status_code=409, detail="Two different passwords were entered"
+            )
 
         user.hash_password()
         user_id = await self._repository.save_user(user=user)
@@ -66,7 +75,9 @@ class AuthService(IAuthService):
         user = await self._repository.fetch_password(email=dto.email)
 
         if not user.verify_password(raw_password=dto.password):
-            pass  # TODO: dodaj raise
+            raise WrongPasswordError(
+                status_code=409, detail="Incorrect password entered"
+            )
 
         access_token = self._create_access_token(user_id=user._user_id, role="client")
         refresh_token_str, exp = self._create_refresh_token(user_id=user._user_id)
@@ -90,7 +101,9 @@ class AuthService(IAuthService):
             user_id=user_id, token=token
         )
         if not result:
-            raise ValueError("CHANGE IT ASASP")  # TODO: zmień
+            raise RefreshTokenNotFoundError(
+                status_code=404, detail="Refresh token does not exist"
+            )
         await self._repository.delete_refresh_token(user_id=user_id)
 
         access_token = self._create_access_token(user_id=user_id, role="client")
