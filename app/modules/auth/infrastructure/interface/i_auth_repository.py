@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 
-from app.modules.auth.domain.entities.refresh_token import RefreshToken
-from app.modules.auth.domain.entities.user import User
+from app.modules.auth.domain.entities import RefreshToken, User
 
 
 class IAuthRepository(ABC):

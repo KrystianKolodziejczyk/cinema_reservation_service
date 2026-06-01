@@ -1,22 +1,18 @@
 from fastapi import APIRouter, Depends, status
 
 from app.modules.auth.application.dto import LoginDTO, RegisterUserDTO
-from app.modules.auth.application.interface.i_auth_service import IAuthService
-from app.modules.auth.presentation.dependencies.auth_deps import get_auth_service
+from app.modules.auth.application.interface import IAuthService
+from app.modules.auth.presentation.dependencies import get_auth_service
 from app.modules.auth.presentation.schemas.requests import (
+    LoginRequest,
+    LogoutRequest,
+    RefreshRequest,
     RegisterUserRequest,
 )
-from app.modules.auth.presentation.schemas.requests.login_request import LoginRequest
-from app.modules.auth.presentation.schemas.requests.logout_request import LogoutRequest
-from app.modules.auth.presentation.schemas.requests.refresh_request import (
-    RefreshRequest,
-)
 from app.modules.auth.presentation.schemas.responses import (
-    RegisterUserResponse,
-)
-from app.modules.auth.presentation.schemas.responses.login_response import LoginResponse
-from app.modules.auth.presentation.schemas.responses.refresh_response import (
+    LoginResponse,
     RefreshResponse,
+    RegisterUserResponse,
 )
 
 router = APIRouter(prefix="/v1/auth")
