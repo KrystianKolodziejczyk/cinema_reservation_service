@@ -1,8 +1,8 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 
 class RegisterUserRequest(BaseModel):
-    email: str = Field(min_length=5)
+    email: EmailStr
     password: str = Field(min_length=6)
     password_repeat: str
     first_name: str = Field(min_length=2)

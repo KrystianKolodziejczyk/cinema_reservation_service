@@ -32,7 +32,7 @@ class AuthRepository(IAuthRepository):
         self._session.add(refresh_token_orm)
         await self._session.flush()
 
-    async def fetch_password(self, email: str) -> User:
+    async def fetch_user(self, email: str) -> User:
         stmt = select(UserORM).where(UserORM.email == email)
         user_orm = await self._session.scalar(stmt)
         return User(
@@ -43,14 +43,27 @@ class AuthRepository(IAuthRepository):
             last_name=user_orm.last_name,
         )  # TODO: dodaj mappery
 
-    async def delete_refresh_token(self, user_id: int) -> None:
-        stmt = delete(RefreshTokenORM).where(RefreshTokenORM.user_id == user_id)
+    async def delete_refresh_token(self, user_id: int, refresh_token_id: int) -> None:
+        stmt = delete(RefreshTokenORM).where(
+            RefreshTokenORM.user_id == user_id,
+            RefreshTokenORM.refresh_token_id == refresh_token_id,
+        )
         await self._session.execute(stmt)
 
-    async def fetch_refresh_token_id(self, user_id: int, token: str) -> int | None:
-        stmt = select(RefreshTokenORM.refresh_token_id).where(
+    async def fetch_refresh_token(
+        self, user_id: int, token: str
+    ) -> RefreshToken | None:
+        stmt = select(RefreshTokenORM).where(
             RefreshTokenORM.user_id == user_id, RefreshTokenORM.token_hash == token
         )
-        result = await self._session.scalar(stmt)
+        refresh_token_orm = await self._session.scalar(stmt)
 
-        return result
+        if not refresh_token_orm:
+            return None
+
+        return RefreshToken(
+            refresh_token_id=refresh_token_orm.refresh_token_id,
+            user_id=refresh_token_orm.user_id,
+            token_hash=refresh_token_orm.token_hash,
+            expires_at=refresh_token_orm.expires_at,
+        )
