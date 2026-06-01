@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = ["ruff"]
+dependencies = ["ruff", "fastapi", "sqlalchemy", "asyncpg", "pydantic", "postgres", "bcrypt", "pyjwt"]
 
 
 [tool.ruff.lint]
@@ -22,7 +22,7 @@ select = [
     # isort
     "I",
 ]
-
+ignore = ["B008"]
 
 [tool.ruff]
 line-length = 88

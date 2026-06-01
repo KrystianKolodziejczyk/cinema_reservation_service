@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
-from shared.database_conn.base_orm import Base
 from sqlalchemy import CheckConstraint, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import String
+
+from app.modules.shared.database_conn.base_orm import Base
 
 if TYPE_CHECKING:
     from app.modules.cinema.infrastructure.orm.screening_orm import ScreeningORM

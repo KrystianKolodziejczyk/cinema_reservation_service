@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
-from shared.database_conn.base_orm import Base
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.modules.shared.database_conn.base_orm import Base
 
 if TYPE_CHECKING:
     from app.modules.cinema.infrastructure.orm import ReservationORM, SeatORM
