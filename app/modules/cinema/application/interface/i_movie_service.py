@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
 
+from app.modules.cinema.domain.entities.movie import Movie
+
 
 class IMovieService(ABC):
     @abstractmethod
     async def get_movies(
-        self, genre: str | None = None, search: str | None = None
-    ) -> dict[str, list[str | int] | int]: ...
+        self, genre: str | None = None, title: str | None = None
+    ) -> list[Movie]: ...

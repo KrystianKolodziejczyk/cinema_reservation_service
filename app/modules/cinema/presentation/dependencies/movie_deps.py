@@ -3,9 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.cinema.application.interface import IMovieService
 from app.modules.cinema.application.service import MovieService
-from app.modules.cinema.infrastructure.repository import (
-    MovieRepository,
-)
+from app.modules.cinema.infrastructure.repository import MovieRepository
 from app.modules.shared.database_conn.database_client import get_session
 
 

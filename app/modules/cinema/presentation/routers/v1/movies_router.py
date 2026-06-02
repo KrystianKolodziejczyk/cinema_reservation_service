@@ -1,10 +1,10 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query, status
 
 from app.modules.cinema.application.interface import IMovieService
 from app.modules.cinema.presentation.dependencies.movie_deps import get_movie_service
-from app.modules.shared.dependencies.auth_deps import get_current_user
+from app.modules.cinema.presentation.schemas.responses import GetMoviesResponse
 
 router = APIRouter(prefix="/v1/movies")
 
@@ -12,11 +12,11 @@ router = APIRouter(prefix="/v1/movies")
 # ==================
 
 
-@router.get("/")
+@router.get("/", status_code=status.HTTP_200_OK, response_model=GetMoviesResponse)
 async def get_movies(
-    user_id: Annotated[int, get_current_user()],
-    service: Annotated[IMovieService, get_movie_service()],
+    service: Annotated[IMovieService, Depends(get_movie_service)],
     genre: Annotated[str, Query()] | None = None,
     search: Annotated[str, Query()] | None = None,
-):
-    pass
+) -> GetMoviesResponse:
+    movies = await service.get_movies(genre=genre, title=search)
+    return GetMoviesResponse(items=movies)
