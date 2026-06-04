@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
+from datetime import date
 
+from app.modules.cinema.application.dto import ScreeningDetailsDTO
 from app.modules.cinema.domain.entities import Movie
 
 
@@ -11,3 +13,8 @@ class IMovieRepository(ABC):
 
     @abstractmethod
     async def fetch_movie(self, movie_id: int) -> Movie | None: ...
+
+    @abstractmethod
+    async def fetch_screening_for_movie(
+        self, movie_id: int, date: date | None
+    ) -> list[ScreeningDetailsDTO] | None: ...
