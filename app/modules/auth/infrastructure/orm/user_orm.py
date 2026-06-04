@@ -22,6 +22,7 @@ class UserORM(Base):
     first_name: Mapped[str]
     last_name: Mapped[str]
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    role: Mapped[str] = mapped_column(default="client")
 
     reservations: Mapped[list[ReservationORM]] = relationship(back_populates="user")
     refresh_tokens: Mapped[list[RefreshTokenORM]] = relationship(back_populates="user")
@@ -29,4 +30,5 @@ class UserORM(Base):
     __table_args__ = (
         CheckConstraint("LENGTH(first_name) > 2", name="ck_user_first_name"),
         CheckConstraint("LENGTH(last_name) > 2", name="ck_user_last_name"),
+        CheckConstraint("role IN ('admin', 'client')", name="ck_user_role"),
     )
