@@ -39,7 +39,8 @@ class AuthRepository(IAuthRepository):
             password=user_orm.password_hash,
             first_name=user_orm.first_name,
             last_name=user_orm.last_name,
-        )  # TODO: dodaj mappery
+            role=user_orm.role,
+        )
 
     async def delete_refresh_token(self, user_id: int, refresh_token_id: int) -> None:
         stmt = delete(RefreshTokenORM).where(
