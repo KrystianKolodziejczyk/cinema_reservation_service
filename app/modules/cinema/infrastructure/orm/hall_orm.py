@@ -15,7 +15,7 @@ class HallORM(Base):
     __tablename__ = "halls"
 
     hall_id: Mapped[int] = mapped_column(primary_key=True)
-    hall_name: Mapped[str] = mapped_column(String(15), unique=True)
+    hall_name: Mapped[str] = mapped_column(String(50), unique=True)
     rows: Mapped[int]
     seats_per_row: Mapped[int]
 
@@ -25,7 +25,7 @@ class HallORM(Base):
     __table_args__ = (
         CheckConstraint("rows > 0 AND rows <= 15", name="ck_rows_count"),
         CheckConstraint(
-            "LENGTH(hall_name) > 0 AND LENGTH(hall_name) <= 15", name="ck_hall_name"
+            "LENGTH(hall_name) > 0 AND LENGTH(hall_name) <= 50", name="ck_hall_name"
         ),
         CheckConstraint(
             "seats_per_row > 0 AND seats_per_row <= 20", name="ck_hall_seats_per_row"
