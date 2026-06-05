@@ -3,6 +3,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.modules.auth.presentation.routers.v1.auth_router import router as auth_router
+from app.modules.cinema.presentation.routers.v1.hall_router import router as hall_router
+from app.modules.cinema.presentation.routers.v1.movies_router import (
+    router as movie_router,
+)
 from app.modules.healthcheck.healthcheck import router as healthcheck_router
 from app.modules.shared.database_conn.database_client import create_tables
 
@@ -17,5 +21,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-app.include_router(auth_router, prefix="/api")
-app.include_router(healthcheck_router, prefix="/api")
+API = "/api"
+
+app.include_router(auth_router, prefix=API)
+app.include_router(healthcheck_router, prefix=API)
+app.include_router(movie_router, prefix=API)
+app.include_router(hall_router, prefix=API)

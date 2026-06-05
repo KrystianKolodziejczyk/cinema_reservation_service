@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 
-from app.modules.auth.application.dto import RegisterUserDTO
-from app.modules.auth.application.dto.login_dto import LoginDTO
+from app.modules.auth.application.dto import LoginDTO, RegisterUserDTO
 
 
 class IAuthService(ABC):

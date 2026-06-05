@@ -3,11 +3,9 @@ from dataclasses import asdict
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.auth.domain.entities.refresh_token import RefreshToken
-from app.modules.auth.domain.entities.user import User
+from app.modules.auth.domain.entities import RefreshToken, User
 from app.modules.auth.infrastructure.interface import IAuthRepository
-from app.modules.auth.infrastructure.orm import UserORM
-from app.modules.auth.infrastructure.orm.refresh_token_orm import RefreshTokenORM
+from app.modules.auth.infrastructure.orm import RefreshTokenORM, UserORM
 
 
 class AuthRepository(IAuthRepository):
@@ -41,7 +39,8 @@ class AuthRepository(IAuthRepository):
             password=user_orm.password_hash,
             first_name=user_orm.first_name,
             last_name=user_orm.last_name,
-        )  # TODO: dodaj mappery
+            role=user_orm.role,
+        )
 
     async def delete_refresh_token(self, user_id: int, refresh_token_id: int) -> None:
         stmt = delete(RefreshTokenORM).where(

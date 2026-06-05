@@ -4,38 +4,31 @@ from datetime import datetime, timedelta
 import jwt
 from sqlalchemy.exc import IntegrityError
 
-from app.modules.auth.application.dto import RegisterUserDTO
-from app.modules.auth.application.dto.login_dto import LoginDTO
-from app.modules.auth.application.exceptions import DifferentPasswordsError
-from app.modules.auth.application.exceptions.duplicate_email_error import (
+from app.modules.auth.application.dto import LoginDTO, RegisterUserDTO
+from app.modules.auth.application.exceptions import (
+    DifferentPasswordsError,
     DuplicateEmailError,
-)
-from app.modules.auth.application.exceptions.refresh_token_expire_error import (
     RefreshTokenExpiredError,
-)
-from app.modules.auth.application.exceptions.refresh_token_not_found_error import (
     RefreshTokenNotFoundError,
-)
-from app.modules.auth.application.exceptions.wrong_password_error import (
     WrongPasswordError,
 )
 from app.modules.auth.application.interface import IAuthService
-from app.modules.auth.domain.entities.refresh_token import RefreshToken
-from app.modules.auth.domain.entities.user import User
+from app.modules.auth.domain.entities import RefreshToken, User
 from app.modules.auth.infrastructure.interface import IAuthRepository
-from app.modules.shared.config.settings import settings
-from app.modules.shared.exceptions.invalid_token_error import InvalidTokenError
+from app.modules.shared.config import settings
+from app.modules.shared.exceptions import InvalidTokenError
 
 
 class AuthService(IAuthService):
     def __init__(self, repository: IAuthRepository) -> None:
         self._repository = repository
 
-    def _create_access_token(self, user_id: int) -> str:
+    def _create_access_token(self, user_id: int, role: str) -> str:
         payload = {
             "sub": str(user_id),
             "iat": datetime.now().timestamp(),
             "exp": (datetime.now() + timedelta(minutes=15)).timestamp(),
+            "role": role,
         }
         return jwt.encode(payload=payload, key=settings.secret_key, algorithm="HS256")
 
@@ -97,7 +90,7 @@ class AuthService(IAuthService):
                 status_code=409, detail="Email already in database"
             ) from e
 
-        access_token = self._create_access_token(user_id=user_id)
+        access_token = self._create_access_token(user_id=user_id, role=user._role)
         refresh_token_str, exp = self._create_refresh_token(user_id)
 
         refresh_token_entity = RefreshToken(
@@ -119,7 +112,7 @@ class AuthService(IAuthService):
                 status_code=409, detail="Incorrect password entered"
             )
 
-        access_token = self._create_access_token(user_id=user._user_id)
+        access_token = self._create_access_token(user_id=user._user_id, role=user._role)
         refresh_token_str, exp = self._create_refresh_token(user_id=user._user_id)
 
         await self._repository.save_refresh_token(
