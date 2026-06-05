@@ -17,8 +17,17 @@ router = APIRouter(prefix="/v1/halls")
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def add_hall(
     body: AddHallRequest,
-    user_data: Annotated[int, Depends(get_current_user)],
+    user_data: Annotated[dict, Depends(get_current_user)],
     service: Annotated[IHallService, Depends(get_hall_service)],
 ) -> None:
     dto = AddHallDTO(**body.model_dump())
     await service.add_hall(dto=dto, user_role=user_data["role"])
+
+
+@router.delete("/{hall_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_hall(
+    hall_id: int,
+    user_data: Annotated[dict, Depends(get_current_user)],
+    service: Annotated[IHallService, Depends(get_hall_service)],
+) -> None:
+    await service.delete_hall(hall_id=hall_id, user_role=user_data["role"])

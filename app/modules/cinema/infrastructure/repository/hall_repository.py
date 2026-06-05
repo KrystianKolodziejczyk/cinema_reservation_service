@@ -1,3 +1,4 @@
+from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.cinema.domain.entities import Hall
@@ -5,6 +6,7 @@ from app.modules.cinema.domain.entities.seat import Seat
 from app.modules.cinema.infrastructure.interface import IHallRepository
 from app.modules.cinema.infrastructure.mappers import HallMapper
 from app.modules.cinema.infrastructure.mappers.seat_mapper import SeatMapper
+from app.modules.cinema.infrastructure.orm.hall_orm import HallORM
 
 
 class HallRepository(IHallRepository):
@@ -24,3 +26,9 @@ class HallRepository(IHallRepository):
 
         self._session.add_all(seats_orm)
         await self._session.flush()
+
+    async def delete_hall(self, hall_id: int) -> bool:
+        stmt = delete(HallORM).where(HallORM.hall_id == hall_id).returning(hall_id)
+        result = await self._session.execute(stmt)
+
+        return bool(result)
