@@ -28,7 +28,10 @@ class HallRepository(IHallRepository):
         await self._session.flush()
 
     async def delete_hall(self, hall_id: int) -> bool:
-        stmt = delete(HallORM).where(HallORM.hall_id == hall_id).returning(hall_id)
-        result = await self._session.execute(stmt)
+        stmt = (
+            delete(HallORM)
+            .where(HallORM.hall_id == hall_id)
+            .returning(HallORM.hall_id)
+        )
 
-        return bool(result)
+        return bool(await self._session.scalar(stmt))

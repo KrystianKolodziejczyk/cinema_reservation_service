@@ -1,6 +1,6 @@
 from datetime import date
 
-from sqlalchemy import select, text
+from sqlalchemy import delete, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.cinema.application.dto import ScreeningDetailsDTO
@@ -35,6 +35,20 @@ class MovieRepository(IMovieRepository):
             return
 
         return MovieMapper.to_entity(movie_orm=movie_orm)
+
+    async def create_movie(self, movie: Movie) -> None:
+        movie_orm = MovieMapper.to_orm(movie)
+        self._session.add(movie_orm)
+        await self._session.flush()
+
+    async def delete_movie(self, movie_id: int) -> bool:
+        stmt = (
+            delete(MovieORM)
+            .where(MovieORM.movie_id == movie_id)
+            .returning(MovieORM.movie_id)
+        )
+
+        return bool(await self._session.scalar(stmt))
 
     async def fetch_screening_for_movie(
         self, movie_id: int, date: date | None

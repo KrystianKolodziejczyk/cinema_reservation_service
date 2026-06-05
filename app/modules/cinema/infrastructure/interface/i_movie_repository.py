@@ -18,3 +18,9 @@ class IMovieRepository(ABC):
     async def fetch_screening_for_movie(
         self, movie_id: int, date: date | None
     ) -> list[ScreeningDetailsDTO] | None: ...
+
+    @abstractmethod
+    async def create_movie(self, movie: Movie) -> bool: ...
+
+    @abstractmethod
+    async def delete_movie(self, movie_id: int) -> bool: ...
