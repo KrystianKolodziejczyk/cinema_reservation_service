@@ -1,10 +1,13 @@
+from dataclasses import asdict
+
 from sqlalchemy.exc import IntegrityError
 
-from app.modules.cinema.application.dto.add_screening_dto import AddScreeningDTO
+from app.modules.cinema.application.dto import AddScreeningDTO, UpdateScreeningDTO
 from app.modules.cinema.application.excpetions import (
     HallNotFoundError,
     MovieNotFoundError,
     PermissionDeniedError,
+    ScreeningNotFoundError,
 )
 from app.modules.cinema.application.interface import IScreeningService
 from app.modules.cinema.domain.entities import Screening
@@ -17,7 +20,7 @@ class ScreeningService(IScreeningService):
 
     def _user_role_check(self, user_role: str) -> None:
         if user_role != "admin":
-            raise PermissionDeniedError(status_code=403, details="Permision denied")
+            raise PermissionDeniedError(status_code=403, detail="Permision denied")
 
     async def add_screening(self, dto: AddScreeningDTO, user_role: str) -> None:
         self._user_role_check(user_role=user_role)
@@ -45,3 +48,32 @@ class ScreeningService(IScreeningService):
                 ) from e
             elif "hall_id" in str(e.orig):
                 raise HallNotFoundError(status_code=404, detail="Hall not found") from e
+
+    async def delete_screening(self, screening_id: int, user_role: str) -> None:
+        self._user_role_check(user_role)
+
+        result = await self._repository.delete_screening(screening_id)
+
+        if not result:
+            raise ScreeningNotFoundError(
+                status_code=404, detail="Screening does not exist"
+            )
+
+    async def update_screening(
+        self, screening_id: int, dto: UpdateScreeningDTO, user_role: str
+    ) -> None:
+        self._user_role_check(user_role)
+        screening = await self._repository.fetch_screening(screening_id=screening_id)
+        screening.update_fields(**asdict(dto))
+
+        try:
+            await self._repository.save_screening(screening=screening)
+        except IntegrityError as e:
+            if "movie_id" in str(e.orig):
+                raise MovieNotFoundError(
+                    status_code=404, detail="Movie not found"
+                ) from e
+            elif "hall_id" in str(e.orig):
+                raise HallNotFoundError(
+                    status_code=404, detail="Hall not found"
+                ) from e
