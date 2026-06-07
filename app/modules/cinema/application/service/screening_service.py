@@ -81,6 +81,11 @@ class ScreeningService(IScreeningService):
                 raise HallNotFoundError(status_code=404, detail="Hall not found") from e
 
     async def get_screening(self, screening_id: int) -> ScreeningDetailsDTO:
-        return await self._repository.fetch_screening_with_relations(
+        screening_details = await self._repository.fetch_screening_with_relations(
             screening_id=screening_id
         )
+
+        if not screening_details:
+            raise ScreeningNotFoundError(status_code=404, detail="Screening not found")
+
+        return screening_details

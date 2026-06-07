@@ -58,7 +58,7 @@ class ScreeningRepository(IScreeningRepository):
 
     async def fetch_screening_with_relations(
         self, screening_id: int
-    ) -> ScreeningDetailsDTO:
+    ) -> ScreeningDetailsDTO | None:
         is_occupied = (
             select(ReservedSeatORM.seat_id)
             .join(ReservationORM)
