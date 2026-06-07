@@ -2,7 +2,11 @@ from dataclasses import asdict
 
 from sqlalchemy.exc import IntegrityError
 
-from app.modules.cinema.application.dto import AddScreeningDTO, UpdateScreeningDTO
+from app.modules.cinema.application.dto import (
+    AddScreeningDTO,
+    ScreeningDetailsDTO,
+    UpdateScreeningDTO,
+)
 from app.modules.cinema.application.excpetions import (
     HallNotFoundError,
     MovieNotFoundError,
@@ -74,6 +78,9 @@ class ScreeningService(IScreeningService):
                     status_code=404, detail="Movie not found"
                 ) from e
             elif "hall_id" in str(e.orig):
-                raise HallNotFoundError(
-                    status_code=404, detail="Hall not found"
-                ) from e
+                raise HallNotFoundError(status_code=404, detail="Hall not found") from e
+
+    async def get_screening(self, screening_id: int) -> ScreeningDetailsDTO:
+        return await self._repository.fetch_screening_with_relations(
+            screening_id=screening_id
+        )

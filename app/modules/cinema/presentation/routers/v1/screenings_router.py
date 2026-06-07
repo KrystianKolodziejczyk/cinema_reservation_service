@@ -9,6 +9,9 @@ from app.modules.cinema.presentation.schemas.request import (
     AddScreeningRequest,
     UpdateScreeningRequest,
 )
+from app.modules.cinema.presentation.schemas.responses.get_screenings_response import (
+    GetScreeningResponse,
+)
 from app.modules.shared.dependencies.auth_deps import get_current_user
 
 router = APIRouter(prefix="/v1/screenings")
@@ -48,3 +51,16 @@ async def update_screening(
     await service.update_screening(
         screening_id=screening_id, dto=dto, user_role=user_data["role"]
     )
+
+
+@router.get(
+    "/{screening_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=GetScreeningResponse,
+)
+async def get_screening(
+    screening_id: int,
+    service: Annotated[IScreeningService, Depends(get_screening_service)],
+) -> GetScreeningResponse:
+    screening_details = await service.get_screening(screening_id=screening_id)
+    return GetScreeningResponse.model_validate(screening_details)

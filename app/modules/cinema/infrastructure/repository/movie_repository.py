@@ -50,9 +50,7 @@ class MovieRepository(IMovieRepository):
 
         return bool(await self._session.scalar(stmt))
 
-    async def fetch_screening_for_movie(
-        self, movie_id: int, date: date | None
-    ) -> list[ScreeningDetailsDTO] | None:
+    async def fetch_screening_for_movie(self, movie_id: int, date: date | None):
         stmt = text("""
             SELECT
                 screenings.screening_id, 
