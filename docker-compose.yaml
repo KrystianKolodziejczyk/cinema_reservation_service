@@ -1,6 +1,6 @@
 services:
   nginx:
-    container_name: cinema-rev-proxy
+    container_name: cinema_rev_proxy
     image: nginx:alpine
     ports:
       - 80:80
@@ -21,6 +21,21 @@ services:
     depends_on:
       db:
         condition: service_healthy
+  redis:
+    container_name: cinema_redis
+    image: redis:alpine
+    ports:
+      - 6379:6379
+    env_file:
+      - .env
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   db:
     container_name: cinema_database
     image: postgres:18-alpine
@@ -29,7 +44,7 @@ services:
     ports:
       - 8000:5432 # TODO: zmień na expose na produkcji
     volumes:
-      - pgdata:/var/lib/posgresql
+      - pgdata:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U user -d cinema_database"]
       interval: 5s
@@ -38,3 +53,4 @@ services:
 
 volumes:
   pgdata:
+  redisdata:

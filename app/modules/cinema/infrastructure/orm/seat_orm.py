@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from sqlalchemy import CheckConstraint, ForeignKey, Index
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, query_expression, relationship
 
 from app.modules.shared.database_conn.base_orm import Base
 
@@ -21,6 +21,7 @@ class SeatORM(Base):
     row: Mapped[int]
     number: Mapped[int]
     seat_type: Mapped[str] = mapped_column(default="normal")
+    status: Mapped[str] = query_expression()
 
     hall: Mapped[HallORM] = relationship(back_populates="seats")
     reserved_seats: Mapped[list[ReservedSeatORM]] = relationship(back_populates="seat")
