@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from app.modules.cinema.application.dto import ScreeningDetailsDTO
+from app.modules.cinema.application.dto import ScreeningDetailsDTO, SeatHoldData
 from app.modules.cinema.domain.entities.screening import Screening
 
 
@@ -21,3 +21,8 @@ class IScreeningRepository(ABC):
     async def fetch_screening_with_relations(
         self, screening_id: int
     ) -> ScreeningDetailsDTO | None: ...
+
+    @abstractmethod
+    async def fetch_seats_by_ids(
+        self, screening_id: int, seat_ids: list[int]
+    ) -> list[SeatHoldData]: ...

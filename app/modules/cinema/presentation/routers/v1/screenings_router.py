@@ -7,10 +7,12 @@ from app.modules.cinema.application.interface import IScreeningService
 from app.modules.cinema.presentation.dependencies import get_screening_service
 from app.modules.cinema.presentation.schemas.request import (
     AddScreeningRequest,
+    HoldSeatsRequest,
     UpdateScreeningRequest,
 )
-from app.modules.cinema.presentation.schemas.responses.get_screenings_response import (
+from app.modules.cinema.presentation.schemas.responses import (
     GetScreeningResponse,
+    HoldSeatsResponse,
 )
 from app.modules.shared.dependencies.auth_deps import get_current_user
 
@@ -64,3 +66,39 @@ async def get_screening(
 ) -> GetScreeningResponse:
     screening_details = await service.get_screening(screening_id=screening_id)
     return GetScreeningResponse.model_validate(screening_details)
+
+
+@router.post(
+    "/{screening_id}/seats/hold",
+    status_code=status.HTTP_200_OK,
+    response_model=HoldSeatsResponse,
+)
+async def hold_seats(
+    screening_id: int,
+    body: HoldSeatsRequest,
+    user_data: Annotated[dict, Depends(get_current_user)],
+    service: Annotated[IScreeningService, Depends(get_screening_service)],
+) -> HoldSeatsResponse:
+    result = await service.hold_seats(
+        seat_ids=body.seat_ids,
+        user_id=user_data["user_id"],
+        screening_id=screening_id,
+    )
+    return HoldSeatsResponse.model_validate(result, from_attributes=True)
+
+
+@router.delete(
+    "/{screening_id}/seats/hold/{hold_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def release_hold(
+    screening_id: int,
+    hold_id: int,
+    user_data: Annotated[dict, Depends(get_current_user)],
+    service: Annotated[IScreeningService, Depends(get_screening_service)],
+) -> None:
+    await service.release_hold(
+        hold_id=hold_id,
+        user_id=user_data["user_id"],
+        screening_id=screening_id,
+    )
