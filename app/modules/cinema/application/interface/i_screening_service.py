@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 from app.modules.cinema.application.dto import (
     AddScreeningDTO,
+    ReservationHoldDTO,
     ScreeningDetailsDTO,
     UpdateScreeningDTO,
 )
@@ -21,3 +22,13 @@ class IScreeningService(ABC):
 
     @abstractmethod
     async def get_screening(self, screening_id: int) -> ScreeningDetailsDTO: ...
+
+    @abstractmethod
+    async def hold_seats(
+        self, seat_ids: list[int], user_id: int, screening_id: int
+    ) -> ReservationHoldDTO: ...
+
+    @abstractmethod
+    async def release_hold(
+        self, hold_id: int, user_id: int, screening_id: int
+    ) -> None: ...

@@ -6,6 +6,7 @@ from app.modules.cinema.application.dto import (
     MovieData,
     ScreeningDetailsDTO,
     SeatData,
+    SeatHoldData,
 )
 from app.modules.cinema.application.excpetions import ScreeningNotFoundError
 from app.modules.cinema.domain.entities import Screening
@@ -116,3 +117,35 @@ class ScreeningRepository(IScreeningRepository):
                 for seat in screening_orm.hall.seats
             ],
         )
+
+    async def fetch_seats_by_ids(
+        self, screening_id: int, seat_ids: list[int]
+    ) -> list[SeatHoldData]:
+        stmt = (
+            select(
+                SeatORM.seat_id,
+                SeatORM.row,
+                SeatORM.number,
+                SeatORM.seat_type,
+                ScreeningORM.price_normal,
+                ScreeningORM.price_vip,
+            )
+            .join(HallORM, SeatORM.hall_id == HallORM.hall_id)
+            .join(ScreeningORM, ScreeningORM.hall_id == HallORM.hall_id)
+            .where(
+                ScreeningORM.screening_id == screening_id,
+                SeatORM.seat_id.in_(seat_ids),
+            )
+        )
+
+        rows = (await self._session.execute(stmt)).all()
+
+        return [
+            SeatHoldData(
+                seat_id=row.seat_id,
+                row=row.row,
+                number=row.number,
+                price=row.price_normal if row.seat_type == "normal" else row.price_vip,
+            )
+            for row in rows
+        ]
