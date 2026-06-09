@@ -1,3 +1,9 @@
 from redis import Redis
 
-redis_client = Redis(decode_responses=True)
+from app.modules.shared.config.settings import settings
+
+redis_client = Redis(
+    host=settings.redis_host,
+    port=settings.redis_port,
+    decode_responses=True,
+)
