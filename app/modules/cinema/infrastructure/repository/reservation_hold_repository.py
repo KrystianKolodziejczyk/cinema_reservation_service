@@ -3,7 +3,7 @@ from datetime import UTC, datetime, timedelta
 
 from redis import Redis
 
-from app.modules.cinema.application.dto import SeatHoldData
+from app.modules.cinema.application.dto import HoldDTO, SeatHoldData
 from app.modules.cinema.application.excpetions import PermissionDeniedError
 from app.modules.cinema.infrastructure.interface import IReservationHoldRepository
 
@@ -31,6 +31,16 @@ class ReservationHoldRepository(IReservationHoldRepository):
                 "screening_id": screening_id,
                 "seat_ids": seat_ids,
                 "expires_at": expires_at.isoformat(),
+                "seats": [
+                    {
+                        "seat_id": s.seat_id,
+                        "row": s.row,
+                        "number": s.number,
+                        "price": s.price,
+                    }
+                    for s in seats_data
+                ],
+                "total_price": sum(s.price for s in seats_data),
             }
         )
         self._redis.set(f"reservation_hold:{hold_id}", payload, ex=HOLD_TTL_SECONDS)
@@ -45,6 +55,34 @@ class ReservationHoldRepository(IReservationHoldRepository):
         pipe.execute()
 
         return hold_id, expires_at
+
+    async def get_hold(self, hold_id: int, user_id: int) -> HoldDTO | None:
+        raw = self._redis.get(f"reservation_hold:{hold_id}")
+        if not raw:
+            return None
+
+        data = json.loads(raw)
+
+        if data["user_id"] != user_id:
+            raise PermissionDeniedError(status_code=403, detail="Permission denied")
+
+        return HoldDTO(
+            hold_id=data["hold_id"],
+            user_id=data["user_id"],
+            screening_id=data["screening_id"],
+            seat_ids=data["seat_ids"],
+            seats=[
+                SeatHoldData(
+                    seat_id=s["seat_id"],
+                    row=s["row"],
+                    number=s["number"],
+                    price=s["price"],
+                )
+                for s in data["seats"]
+            ],
+            total_price=data["total_price"],
+            expires_at=datetime.fromisoformat(data["expires_at"]),
+        )
 
     async def release(self, hold_id: int, user_id: int, screening_id: int) -> bool:
         raw = self._redis.get(f"reservation_hold:{hold_id}")

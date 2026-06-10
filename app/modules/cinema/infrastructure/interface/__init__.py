@@ -1,3 +1,5 @@
+from .i_reservation_repository import IReservationRepository
+
 from .i_hall_repository import IHallRepository
 from .i_movie_repository import IMovieRepository
 from .i_reservation_hold_repository import IReservationHoldRepository
@@ -8,4 +10,5 @@ __all__ = [
     "IHallRepository",
     "IScreeningRepository",
     "IReservationHoldRepository",
+    "IReservationRepository",
 ]
