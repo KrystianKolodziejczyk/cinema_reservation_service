@@ -25,11 +25,13 @@ class ScreeningRepository(IScreeningRepository):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def create_screenings(self, screenings: list[Screening]) -> None:
+    async def create_screenings(self, screenings: list[Screening]) -> list[int]:
         screenings_orm = [ScreeningMapper.to_orm(screening) for screening in screenings]
 
         self._session.add_all(screenings_orm)
         await self._session.flush()
+
+        return [s.screening_id for s in screenings_orm]
 
     async def delete_screening(self, screening_id: int) -> bool:
         stmt = (

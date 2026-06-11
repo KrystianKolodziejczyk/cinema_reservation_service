@@ -1,12 +1,10 @@
-from sqlalchemy import delete
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.cinema.domain.entities import Hall
-from app.modules.cinema.domain.entities.seat import Seat
+from app.modules.cinema.domain.entities import Hall, Seat
 from app.modules.cinema.infrastructure.interface import IHallRepository
-from app.modules.cinema.infrastructure.mappers import HallMapper
-from app.modules.cinema.infrastructure.mappers.seat_mapper import SeatMapper
-from app.modules.cinema.infrastructure.orm.hall_orm import HallORM
+from app.modules.cinema.infrastructure.mappers import HallMapper, SeatMapper
+from app.modules.cinema.infrastructure.orm import HallORM, SeatORM
 
 
 class HallRepository(IHallRepository):
@@ -33,3 +31,8 @@ class HallRepository(IHallRepository):
         )
 
         return bool(await self._session.scalar(stmt))
+
+    async def fetch_seat_ids(self, hall_id: int) -> list[int]:
+        stmt = select(SeatORM.seat_id).where(SeatORM.hall_id == hall_id)
+
+        return (await self._session.scalars(stmt)).all()

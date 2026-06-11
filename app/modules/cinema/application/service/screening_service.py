@@ -16,21 +16,27 @@ from app.modules.cinema.application.excpetions import (
     SeatUnavailableError,
 )
 from app.modules.cinema.application.interface import IScreeningService
-from app.modules.cinema.domain.entities import Screening
+from app.modules.cinema.domain.entities import Screening, ScreeningSeat
 from app.modules.cinema.infrastructure.interface import (
+    IHallRepository,
     IReservationHoldRepository,
     IScreeningRepository,
+    IScreeningSeatRepository,
 )
 
 
 class ScreeningService(IScreeningService):
     def __init__(
         self,
-        repository: IScreeningRepository,
+        screening_repository: IScreeningRepository,
+        hall_repository: IHallRepository,
         redis_repository: IReservationHoldRepository,
+        screening_seat_repository: IScreeningSeatRepository,
     ) -> None:
-        self._repository = repository
+        self._screening_repository = screening_repository
+        self._hall_repository = hall_repository
         self._redis_repository = redis_repository
+        self._screening_seat_repository = screening_seat_repository
 
     def _user_role_check(self, user_role: str) -> None:
         if user_role != "admin":
@@ -53,7 +59,9 @@ class ScreeningService(IScreeningService):
         ]
 
         try:
-            await self._repository.create_screenings(screenings=screenings)
+            screening_ids = await self._repository.create_screenings(
+                screenings=screenings
+            )
 
         except IntegrityError as e:
             if "movie_id" in str(e.orig):
@@ -62,6 +70,23 @@ class ScreeningService(IScreeningService):
                 ) from e
             elif "hall_id" in str(e.orig):
                 raise HallNotFoundError(status_code=404, detail="Hall not found") from e
+
+        seat_ids = await self._hall_repository.fetch_seat_ids(hall_id=dto.hall_id)
+
+        screening_seats = [
+            ScreeningSeat(
+                screening_id=screening_id,
+                seat_id=seat_id,
+                reservation_id=None,
+                status="free",
+            )
+            for screening_id in screening_ids
+            for seat_id in seat_ids
+        ]
+
+        await self._screening_seat_repository.create_screening_seats(
+            screening_seats=screening_seats
+        )
 
     async def delete_screening(self, screening_id: int, user_role: str) -> None:
         self._user_role_check(user_role)

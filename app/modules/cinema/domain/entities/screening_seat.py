@@ -6,4 +6,5 @@ from typing import Literal
 class ScreeningSeat:
     screening_id: int
     seat_id: int
+    reservation_id: int | None
     status: Literal["free", "reserved", "cancelled"]
