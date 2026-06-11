@@ -1,3 +1,5 @@
+from sqlalchemy.exc import IntegrityError
+
 from app.modules.cinema.application.dto import CreateReservationDTO
 from app.modules.cinema.application.excpetions import ReservationDataNotFoundError
 from app.modules.cinema.application.interface import IReservationService
@@ -38,4 +40,13 @@ class ReservationService(IReservationService):
             conf_code="example",
         )
 
-        await self._repository.save_reservation(reservation=reservation)
+        try:
+            reservation_id = await self._repository.save_reservation(
+                reservation=reservation
+            )
+        except IntegrityError as e:
+            raise InvalidDataError(status_code=409, detail="Incompatible data") from e
+
+        await self._repository.save_reserved_seats(
+            seats=hold_data.seats, reservation_id=reservation_id
+        )

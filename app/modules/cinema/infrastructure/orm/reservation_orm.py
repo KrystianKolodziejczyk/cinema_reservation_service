@@ -10,7 +10,11 @@ from app.modules.shared.database_conn.base_orm import Base
 
 if TYPE_CHECKING:
     from app.modules.auth.infrastructure.orm import UserORM
-    from app.modules.cinema.infrastructure.orm import ReservedSeatORM, ScreeningORM
+    from app.modules.cinema.infrastructure.orm import (
+        ReservedSeatORM,
+        ScreeningORM,
+        ScreeningSeatORM,
+    )
 
 
 class ReservationORM(Base):
@@ -31,6 +35,9 @@ class ReservationORM(Base):
     user: Mapped[UserORM] = relationship(back_populates="reservations")
     screening: Mapped[ScreeningORM] = relationship(back_populates="reservations")
     reserved_seats: Mapped[list[ReservedSeatORM]] = relationship(
+        back_populates="reservation"
+    )
+    screening_seats: Mapped[list[ScreeningSeatORM]] = relationship(
         back_populates="reservation"
     )
 

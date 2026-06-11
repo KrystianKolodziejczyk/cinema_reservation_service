@@ -3,6 +3,7 @@ from .movie_orm import MovieORM
 from .reservation_orm import ReservationORM
 from .reserved_seat_orm import ReservedSeatORM
 from .screening_orm import ScreeningORM
+from .screening_seat_orm import ScreeningSeatORM
 from .seat_orm import SeatORM
 
 __all__ = [
@@ -12,4 +13,5 @@ __all__ = [
     "ScreeningORM",
     "SeatORM",
     "ReservedSeatORM",
+    "ScreeningSeatORM",
 ]

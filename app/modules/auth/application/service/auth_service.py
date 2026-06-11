@@ -32,12 +32,13 @@ class AuthService(IAuthService):
         }
         return jwt.encode(payload=payload, key=settings.secret_key, algorithm="HS256")
 
-    def _create_refresh_token(self, user_id: int) -> tuple[str, datetime]:
+    def _create_refresh_token(self, user_id: int, role: str) -> tuple[str, datetime]:
         exp_dt = datetime.now() + timedelta(days=7)
         payload = {
             "sub": str(user_id),
             "iat": datetime.now().timestamp(),
             "exp": exp_dt.timestamp(),
+            "role": role,
         }
         token = jwt.encode(payload=payload, key=settings.secret_key, algorithm="HS256")
         return token, exp_dt
@@ -45,10 +46,11 @@ class AuthService(IAuthService):
     def _hash_token(self, token: str) -> str:
         return hashlib.sha256(token.encode()).hexdigest()
 
-    async def _validate_refresh_token(self, token: str) -> tuple[RefreshToken, int]:
+    async def _validate_refresh_token(self, token: str) -> tuple[RefreshToken, int, str]:
         try:
             payload = jwt.decode(token, key=settings.secret_key, algorithms=["HS256"])
             user_id = int(payload["sub"])
+            role = payload["role"]
         except jwt.InvalidTokenError as e:
             raise InvalidTokenError(status_code=409, detail="Invalid token") from e
 
@@ -66,7 +68,7 @@ class AuthService(IAuthService):
                 status_code=409, detail="Refresh token expired"
             )
 
-        return refresh_token, user_id
+        return refresh_token, user_id, role
 
     async def register_user(self, dto: RegisterUserDTO) -> dict[str, str]:
         user = User(
@@ -91,7 +93,7 @@ class AuthService(IAuthService):
             ) from e
 
         access_token = self._create_access_token(user_id=user_id, role=user._role)
-        refresh_token_str, exp = self._create_refresh_token(user_id)
+        refresh_token_str, exp = self._create_refresh_token(user_id=user_id, role=user._role)
 
         refresh_token_entity = RefreshToken(
             refresh_token_id=None,
@@ -113,7 +115,7 @@ class AuthService(IAuthService):
             )
 
         access_token = self._create_access_token(user_id=user._user_id, role=user._role)
-        refresh_token_str, exp = self._create_refresh_token(user_id=user._user_id)
+        refresh_token_str, exp = self._create_refresh_token(user_id=user._user_id, role=user._role)
 
         await self._repository.save_refresh_token(
             refresh_token=RefreshToken(
@@ -127,21 +129,21 @@ class AuthService(IAuthService):
         return {"access_token": access_token, "refresh_token": refresh_token_str}
 
     async def logout(self, token: str) -> None:
-        refresh_token, user_id = await self._validate_refresh_token(token=token)
+        refresh_token, user_id, _ = await self._validate_refresh_token(token=token)
 
         await self._repository.delete_refresh_token(
             user_id=user_id, refresh_token_id=refresh_token.refresh_token_id
         )
 
     async def refresh(self, token: str) -> dict[str, str]:
-        refresh_token, user_id = await self._validate_refresh_token(token=token)
+        refresh_token, user_id, role = await self._validate_refresh_token(token=token)
 
         await self._repository.delete_refresh_token(
             user_id=user_id, refresh_token_id=refresh_token.refresh_token_id
         )
 
-        access_token = self._create_access_token(user_id=user_id)
-        new_refresh_token, exp = self._create_refresh_token(user_id=user_id)
+        access_token = self._create_access_token(user_id=user_id, role=role)
+        new_refresh_token, exp = self._create_refresh_token(user_id=user_id, role=role)
 
         await self._repository.save_refresh_token(
             refresh_token=RefreshToken(

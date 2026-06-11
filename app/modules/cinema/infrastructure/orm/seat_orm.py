@@ -5,10 +5,15 @@ from typing import TYPE_CHECKING
 from sqlalchemy import CheckConstraint, ForeignKey, Index
 from sqlalchemy.orm import Mapped, mapped_column, query_expression, relationship
 
+from app.modules.cinema.infrastructure.orm import ScreeningSeatORM
 from app.modules.shared.database_conn.base_orm import Base
 
 if TYPE_CHECKING:
-    from app.modules.cinema.infrastructure.orm import HallORM, ReservedSeatORM
+    from app.modules.cinema.infrastructure.orm import (
+        HallORM,
+        ReservedSeatORM,
+        ScreeningSeatORM,
+    )
 
 
 class SeatORM(Base):
@@ -25,6 +30,7 @@ class SeatORM(Base):
 
     hall: Mapped[HallORM] = relationship(back_populates="seats")
     reserved_seats: Mapped[list[ReservedSeatORM]] = relationship(back_populates="seat")
+    screening_seat: Mapped[ScreeningSeatORM] = relationship(back_populates="seat")
 
     __table_args__ = (
         Index("idx_seat_row", "row"),
