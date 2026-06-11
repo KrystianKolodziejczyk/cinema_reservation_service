@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from sqlalchemy import CheckConstraint, ForeignKey
@@ -22,8 +24,8 @@ class ScreeningSeatORM(Base):
     seat_id: Mapped[int] = mapped_column(
         ForeignKey("seats.seat_id", ondelete="CASCADE"), primary_key=True
     )
-    reservation_id: Mapped[int] = mapped_column(
-        ForeignKey("reservations.reservation_id", ondelete="SET NULL")
+    reservation_id: Mapped[int | None] = mapped_column(
+        ForeignKey("reservations.reservation_id", ondelete="SET NULL"), nullable=True
     )
     status: Mapped[str] = mapped_column(default="free")
 

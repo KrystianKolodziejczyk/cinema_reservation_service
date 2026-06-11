@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 from sqlalchemy import CheckConstraint, ForeignKey, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.modules.cinema.infrastructure.orm import ScreeningSeatORM
 from app.modules.shared.database_conn.base_orm import Base
 
 if TYPE_CHECKING:

@@ -59,7 +59,7 @@ class ScreeningService(IScreeningService):
         ]
 
         try:
-            screening_ids = await self._repository.create_screenings(
+            screening_ids = await self._screening_repository.create_screenings(
                 screenings=screenings
             )
 
@@ -91,7 +91,7 @@ class ScreeningService(IScreeningService):
     async def delete_screening(self, screening_id: int, user_role: str) -> None:
         self._user_role_check(user_role)
 
-        result = await self._repository.delete_screening(screening_id)
+        result = await self._screening_repository.delete_screening(screening_id)
 
         if not result:
             raise ScreeningNotFoundError(
@@ -102,11 +102,13 @@ class ScreeningService(IScreeningService):
         self, screening_id: int, dto: UpdateScreeningDTO, user_role: str
     ) -> None:
         self._user_role_check(user_role)
-        screening = await self._repository.fetch_screening(screening_id=screening_id)
+        screening = await self._screening_repository.fetch_screening(
+            screening_id=screening_id
+        )
         screening.update_fields(**asdict(dto))
 
         try:
-            await self._repository.save_screening(screening=screening)
+            await self._screening_repository.save_screening(screening=screening)
         except IntegrityError as e:
             if "movie_id" in str(e.orig):
                 raise MovieNotFoundError(
@@ -116,8 +118,10 @@ class ScreeningService(IScreeningService):
                 raise HallNotFoundError(status_code=404, detail="Hall not found") from e
 
     async def get_screening(self, screening_id: int) -> ScreeningDetailsDTO:
-        screening_details = await self._repository.fetch_screening_with_relations(
-            screening_id=screening_id
+        screening_details = (
+            await self._screening_repository.fetch_screening_with_relations(
+                screening_id=screening_id
+            )
         )
 
         if not screening_details:
@@ -128,13 +132,13 @@ class ScreeningService(IScreeningService):
     async def hold_seats(
         self, seat_ids: list[int], user_id: int, screening_id: int
     ) -> ReservationHoldDTO:
-        screening = await self._repository.fetch_screening_with_relations(
+        screening = await self._screening_repository.fetch_screening_with_relations(
             screening_id=screening_id
         )
         if not screening:
             raise ScreeningNotFoundError(status_code=404, detail="Screening not found")
 
-        seats_data = await self._repository.fetch_seats_by_ids(
+        seats_data = await self._screening_repository.fetch_seats_by_ids(
             screening_id=screening_id, seat_ids=seat_ids
         )
 
