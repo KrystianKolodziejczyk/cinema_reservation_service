@@ -150,16 +150,16 @@ class ScreeningService(IScreeningService):
                 detail=f"Seats not found in this screening: {missing}",
             )
 
-        occupied_by_row_number = {
-            (s.row, s.number) for s in screening.seats if s.status == "occupied"
+        reserved_by_row_number = {
+            (s.row, s.number) for s in screening.seats if s.status == "reserved"
         }
-        occupied_ids = [
-            s.seat_id for s in seats_data if (s.row, s.number) in occupied_by_row_number
+        reserved_ids = [
+            s.seat_id for s in seats_data if (s.row, s.number) in reserved_by_row_number
         ]
-        if occupied_ids:
+        if reserved_ids:
             raise SeatUnavailableError(
                 status_code=409,
-                detail=f"Seats already reserved: {occupied_ids}",
+                detail=f"Seats already reserved: {reserved_ids}",
             )
 
         already_held = await self._redis_repository.are_seats_held(
