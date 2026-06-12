@@ -1,14 +1,20 @@
 from sqlalchemy.exc import IntegrityError
 
-from app.modules.cinema.application.dto import CreateReservationDTO
-from app.modules.cinema.application.excpetions import ReservationDataNotFoundError
+from app.modules.cinema.application.dto import CreateReservationDTO, GetReservationDTO
+from app.modules.cinema.application.excpetions import (
+    ReservationDataNotFoundError,
+    ReservationNotFoundError,
+)
+from app.modules.cinema.application.excpetions.permission_denied_error import (
+    PermissionDeniedError,
+)
 from app.modules.cinema.application.interface import IReservationService
 from app.modules.cinema.domain.entities import Reservation
 from app.modules.cinema.infrastructure.interface import (
+    IReservationHoldRepository,
     IReservationRepository,
     IScreeningSeatRepository,
 )
-from app.modules.cinema.infrastructure.repository import ReservationHoldRepository
 from app.modules.shared.exceptions import InvalidDataError
 
 
@@ -16,7 +22,7 @@ class ReservationService(IReservationService):
     def __init__(
         self,
         reservation_repository: IReservationRepository,
-        redis_repository: ReservationHoldRepository,
+        redis_repository: IReservationHoldRepository,
         screening_seat_repository: IScreeningSeatRepository,
     ) -> None:
         self._reservation_repository = reservation_repository
@@ -60,3 +66,23 @@ class ReservationService(IReservationService):
             reservation_id=reservation_id,
             seat_ids=[seat.seat_id for seat in hold_data.seats],
         )
+
+    async def get_reservation(
+        self, reservation_id: int, user_data: dict[str, str | int]
+    ) -> GetReservationDTO:
+        reservation_details = await self._reservation_repository.fetch_reservation(
+            reservation_id=reservation_id
+        )
+
+        if reservation_details is None:
+            raise ReservationNotFoundError(
+                status_code=404, detail="Reservation not found"
+            )
+
+        if (
+            user_data["role"] != "admin"
+            and reservation_details.user_id != user_data["user_id"]
+        ):
+            raise PermissionDeniedError(status_code=403, detail="Permission denied")
+
+        return reservation_details

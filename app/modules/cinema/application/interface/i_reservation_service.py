@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from app.modules.cinema.application.dto import CreateReservationDTO
+from app.modules.cinema.application.dto import CreateReservationDTO, GetReservationDTO
 
 
 class IReservationService(ABC):
@@ -8,3 +8,8 @@ class IReservationService(ABC):
     async def create_reservation(
         self, user_id: int, dto: CreateReservationDTO
     ) -> None: ...
+
+    @abstractmethod
+    async def get_reservation(
+        self, reservation_id: int, user_data: dict[str, str | int]
+    ) -> GetReservationDTO: ...
