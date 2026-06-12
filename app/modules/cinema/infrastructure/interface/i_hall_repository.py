@@ -13,3 +13,6 @@ class IHallRepository:
 
     @abstractmethod
     async def delete_hall(self, hall_id: int) -> None: ...
+
+    @abstractmethod
+    async def fetch_seat_ids(self, hall_id: int) -> list[int]: ...

@@ -1,6 +1,6 @@
-from sqlalchemy import case, delete, select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload, with_expression
+from sqlalchemy.orm import selectinload
 
 from app.modules.cinema.application.dto import (
     MovieData,
@@ -14,9 +14,8 @@ from app.modules.cinema.infrastructure.interface import IScreeningRepository
 from app.modules.cinema.infrastructure.mappers import ScreeningMapper
 from app.modules.cinema.infrastructure.orm import (
     HallORM,
-    ReservationORM,
-    ReservedSeatORM,
     ScreeningORM,
+    ScreeningSeatORM,
     SeatORM,
 )
 
@@ -25,11 +24,13 @@ class ScreeningRepository(IScreeningRepository):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def create_screenings(self, screenings: list[Screening]) -> None:
+    async def create_screenings(self, screenings: list[Screening]) -> list[int]:
         screenings_orm = [ScreeningMapper.to_orm(screening) for screening in screenings]
 
         self._session.add_all(screenings_orm)
         await self._session.flush()
+
+        return [s.screening_id for s in screenings_orm]
 
     async def delete_screening(self, screening_id: int) -> bool:
         stmt = (
@@ -60,29 +61,14 @@ class ScreeningRepository(IScreeningRepository):
     async def fetch_screening_with_relations(
         self, screening_id: int
     ) -> ScreeningDetailsDTO | None:
-        is_occupied = (
-            select(ReservedSeatORM.seat_id)
-            .join(ReservationORM)
-            .where(
-                ReservedSeatORM.seat_id == SeatORM.seat_id,
-                ReservationORM.screening_id == screening_id,
-            )
-            .correlate(SeatORM)
-            .exists()
-        )
-
         stmt = (
             select(ScreeningORM)
             .where(ScreeningORM.screening_id == screening_id)
             .options(
                 selectinload(ScreeningORM.movie),
-                selectinload(ScreeningORM.hall)
-                .selectinload(HallORM.seats)
-                .options(
-                    with_expression(
-                        SeatORM.status,
-                        case((is_occupied, "occupied"), else_="free"),
-                    )
+                selectinload(ScreeningORM.hall),
+                selectinload(ScreeningORM.screening_seats).selectinload(
+                    ScreeningSeatORM.seat
                 ),
             )
         )
@@ -95,7 +81,7 @@ class ScreeningRepository(IScreeningRepository):
         return ScreeningDetailsDTO(
             screening_id=screening_orm.screening_id,
             movie=MovieData(
-                screening_orm.movie.title,
+                title=screening_orm.movie.title,
                 description=screening_orm.movie.description,
                 director=screening_orm.movie.director,
                 duration=screening_orm.movie.duration,
@@ -106,15 +92,15 @@ class ScreeningRepository(IScreeningRepository):
             hall_name=screening_orm.hall.hall_name,
             seats=[
                 SeatData(
-                    row=seat.row,
-                    number=seat.number,
-                    seat_type=seat.seat_type,
-                    status=seat.status,
+                    row=ss.seat.row,
+                    number=ss.seat.number,
+                    seat_type=ss.seat.seat_type,
+                    status=ss.status,
                     price=screening_orm.price_normal
-                    if seat.seat_type == "normal"
+                    if ss.seat.seat_type == "normal"
                     else screening_orm.price_vip,
                 )
-                for seat in screening_orm.hall.seats
+                for ss in screening_orm.screening_seats
             ],
         )
 

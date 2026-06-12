@@ -14,11 +14,11 @@ if TYPE_CHECKING:
 class ReservedSeatORM(Base):
     __tablename__ = "reserved_seats"
 
-    reservation_id: Mapped[int] = mapped_column(
-        ForeignKey("reservations.reservation_id", ondelete="CASCADE"), primary_key=True
-    )
     seat_id: Mapped[int] = mapped_column(
-        ForeignKey("seats.seat_id", ondelete="SET NULL"), primary_key=True
+        ForeignKey("seats.seat_id", ondelete="RESTRICT"), primary_key=True
+    )
+    reservation_id: Mapped[int] = mapped_column(
+        ForeignKey("reservations.reservation_id", ondelete="CASCADE")
     )
     price_paid: Mapped[float]
 

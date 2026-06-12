@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 
-from app.modules.cinema.application.dto import SeatHoldData
+from app.modules.cinema.application.dto import HoldDTO, SeatHoldData
 
 
 class IReservationHoldRepository(ABC):
@@ -13,6 +13,9 @@ class IReservationHoldRepository(ABC):
         screening_id: int,
         seats_data: list[SeatHoldData],
     ) -> tuple[int, datetime]: ...
+
+    @abstractmethod
+    async def get_hold(self, hold_id: int, user_id: int) -> HoldDTO | None: ...
 
     @abstractmethod
     async def release(self, hold_id: int, user_id: int, screening_id: int) -> bool: ...

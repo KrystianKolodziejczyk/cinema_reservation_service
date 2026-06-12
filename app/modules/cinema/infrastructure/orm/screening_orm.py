@@ -9,7 +9,12 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.modules.shared.database_conn.base_orm import Base
 
 if TYPE_CHECKING:
-    from app.modules.cinema.infrastructure.orm import HallORM, MovieORM, ReservationORM
+    from app.modules.cinema.infrastructure.orm import (
+        HallORM,
+        MovieORM,
+        ReservationORM,
+        ScreeningSeatORM,
+    )
 
 
 class ScreeningORM(Base):
@@ -30,6 +35,9 @@ class ScreeningORM(Base):
     movie: Mapped[MovieORM] = relationship(back_populates="screenings")
     hall: Mapped[HallORM] = relationship(back_populates="screenings")
     reservations: Mapped[list[ReservationORM]] = relationship(
+        back_populates="screening"
+    )
+    screening_seats: Mapped[list[ScreeningSeatORM]] = relationship(
         back_populates="screening"
     )
 

@@ -18,7 +18,7 @@ class SeatData:
     row: int
     number: int
     seat_type: Literal["normal", "vip"]
-    status: Literal["free", "occupied"]
+    status: Literal["free", "reserved", "cancelled"]
     price: int
 
 

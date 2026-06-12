@@ -9,6 +9,9 @@ from app.modules.cinema.presentation.routers.v1.halls_router import (
 from app.modules.cinema.presentation.routers.v1.movies_router import (
     router as movie_router,
 )
+from app.modules.cinema.presentation.routers.v1.reservation_router import (
+    router as reservation_router,
+)
 from app.modules.cinema.presentation.routers.v1.screenings_router import (
     router as screening_router,
 )
@@ -33,3 +36,4 @@ app.include_router(healthcheck_router, prefix=API)
 app.include_router(movie_router, prefix=API)
 app.include_router(hall_router, prefix=API)
 app.include_router(screening_router, prefix=API)
+app.include_router(reservation_router, prefix=API)
