@@ -17,6 +17,7 @@ class MovieResponse(BaseModel):
 class SeatResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+    seat_id: int
     row: int
     number: int
     seat_type: str

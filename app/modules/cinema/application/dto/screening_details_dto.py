@@ -15,6 +15,7 @@ class MovieData:
 
 @dataclass(frozen=True)
 class SeatData:
+    seat_id: int
     row: int
     number: int
     seat_type: Literal["normal", "vip"]

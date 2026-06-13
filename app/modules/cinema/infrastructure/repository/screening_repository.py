@@ -92,6 +92,7 @@ class ScreeningRepository(IScreeningRepository):
             hall_name=screening_orm.hall.hall_name,
             seats=[
                 SeatData(
+                    seat_id=ss.seat.seat_id,
                     row=ss.seat.row,
                     number=ss.seat.number,
                     seat_type=ss.seat.seat_type,
