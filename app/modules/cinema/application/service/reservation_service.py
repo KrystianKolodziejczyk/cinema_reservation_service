@@ -67,6 +67,12 @@ class ReservationService(IReservationService):
             seat_ids=[seat.seat_id for seat in hold_data.seats],
         )
 
+        await self._redis_repository.release(
+            hold_id=hold_data.hold_id,
+            user_id=user_id,
+            screening_id=hold_data.screening_id,
+        )
+
     async def get_reservation(
         self, reservation_id: int, user_data: dict[str, str | int]
     ) -> GetReservationDTO:
