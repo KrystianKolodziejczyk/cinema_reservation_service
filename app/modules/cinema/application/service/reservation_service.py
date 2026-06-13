@@ -28,7 +28,7 @@ class ReservationService(IReservationService):
         self._redis_repository = redis_repository
         self._screening_seat_repository = screening_seat_repository
 
-    async def create_reservation(self, user_id: int, dto: CreateReservationDTO) -> None:
+    async def create_reservation(self, user_id: int, dto: CreateReservationDTO) -> int:
         hold_data = await self._redis_repository.get_hold(
             hold_id=dto.hold_id, user_id=user_id
         )
@@ -71,6 +71,8 @@ class ReservationService(IReservationService):
             user_id=user_id,
             screening_id=hold_data.screening_id,
         )
+
+        return reservation_id
 
     async def get_reservation(
         self, reservation_id: int, user_data: dict[str, str | int]

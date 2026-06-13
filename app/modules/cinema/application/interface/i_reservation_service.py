@@ -7,7 +7,7 @@ class IReservationService(ABC):
     @abstractmethod
     async def create_reservation(
         self, user_id: int, dto: CreateReservationDTO
-    ) -> None: ...
+    ) -> int: ...
 
     @abstractmethod
     async def get_reservation(
@@ -15,4 +15,6 @@ class IReservationService(ABC):
     ) -> GetReservationDTO: ...
 
     @abstractmethod
-    async def cancel_reservation(self, reservation_id: int, user_data: dict): ...
+    async def cancel_reservation(
+        self, reservation_id: int, user_data: dict
+    ) -> None: ...
