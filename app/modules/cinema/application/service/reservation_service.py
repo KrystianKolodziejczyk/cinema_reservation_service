@@ -2,11 +2,10 @@ from sqlalchemy.exc import IntegrityError
 
 from app.modules.cinema.application.dto import CreateReservationDTO, GetReservationDTO
 from app.modules.cinema.application.excpetions import (
+    CancelReservationError,
+    PermissionDeniedError,
     ReservationDataNotFoundError,
     ReservationNotFoundError,
-)
-from app.modules.cinema.application.excpetions.permission_denied_error import (
-    PermissionDeniedError,
 )
 from app.modules.cinema.application.interface import IReservationService
 from app.modules.cinema.domain.entities import Reservation
@@ -92,3 +91,29 @@ class ReservationService(IReservationService):
             raise PermissionDeniedError(status_code=403, detail="Permission denied")
 
         return reservation_details
+
+    async def cancel_reservation(self, reservation_id: int, user_data: dict) -> None:
+        if user_data["role"] == "admin":
+            await self._release_reservation_everywhere(reservation_id=reservation_id)
+            return
+
+        await self._release_reservation_everywhere(
+            reservation_id=reservation_id, user_id=user_data["user_id"]
+        )
+
+    async def _release_reservation_everywhere(
+        self, reservation_id: int, user_id: int | None = None
+    ) -> None:
+        status_change_result = (
+            await self._reservation_repository.change_reservation_status(
+                reservation_id=reservation_id, user_id=user_id
+            )
+        )
+        if not status_change_result:
+            raise CancelReservationError(
+                status_code=409, detail="Wrong reservation_id or user_id"
+            )
+
+        await self._screening_seat_repository.release_screening_seats(
+            reservation_id=reservation_id
+        )

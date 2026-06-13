@@ -1,3 +1,4 @@
+from .cancel_reservation_error import CancelReservationError
 from .hall_not_found_error import HallNotFoundError
 from .movie_not_found_error import MovieNotFoundError
 from .permission_denied_error import PermissionDeniedError
@@ -14,4 +15,5 @@ __all__ = [
     "SeatUnavailableError",
     "ReservationDataNotFoundError",
     "ReservationNotFoundError",
+    "CancelReservationError",
 ]

@@ -42,3 +42,12 @@ async def get_reservation(
     )
 
     return GetReservationResponse.model_validate(reservation_details)
+
+
+@router.put("/{reservation_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def cancel_reservation(
+    reservation_id: Annotated[int, Path(gt=0)],
+    user_data: Annotated[dict, Depends(get_current_user)],
+    service: Annotated[IReservationService, Depends(get_reservation_service)],
+):
+    await service.cancel_reservation(reservation_id=reservation_id, user_data=user_data)

@@ -18,7 +18,7 @@ class ReservedSeatORM(Base):
         ForeignKey("seats.seat_id", ondelete="RESTRICT"), primary_key=True
     )
     reservation_id: Mapped[int] = mapped_column(
-        ForeignKey("reservations.reservation_id", ondelete="CASCADE")
+        ForeignKey("reservations.reservation_id", ondelete="CASCADE"), primary_key=True
     )
     price_paid: Mapped[float]
 

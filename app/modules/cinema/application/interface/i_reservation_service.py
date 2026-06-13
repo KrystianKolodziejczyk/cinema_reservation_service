@@ -13,3 +13,6 @@ class IReservationService(ABC):
     async def get_reservation(
         self, reservation_id: int, user_data: dict[str, str | int]
     ) -> GetReservationDTO: ...
+
+    @abstractmethod
+    async def cancel_reservation(self, reservation_id: int, user_data: dict): ...

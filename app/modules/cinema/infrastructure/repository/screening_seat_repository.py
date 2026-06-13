@@ -35,3 +35,12 @@ class ScreeningSeatRepository(IScreeningSeatRepository):
         )
 
         await self._session.execute(stmt)
+
+    async def release_screening_seats(self, reservation_id: int) -> bool:
+        stmt = (
+            update(ScreeningSeatORM)
+            .where(ScreeningSeatORM.reservation_id == reservation_id)
+            .values(reservation_id=None, status="free")
+        )
+
+        await self._session.execute(stmt)

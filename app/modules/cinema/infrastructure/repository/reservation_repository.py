@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -41,9 +41,7 @@ class ReservationRepository(IReservationRepository):
         self._session.add_all(reserved_seats_orm)
         await self._session.flush()
 
-    async def fetch_reservation(
-        self, reservation_id: int
-    ) -> GetReservationDTO | None:
+    async def fetch_reservation(self, reservation_id: int) -> GetReservationDTO | None:
         stmt = (
             select(ReservationORM)
             .where(ReservationORM.reservation_id == reservation_id)
@@ -86,3 +84,25 @@ class ReservationRepository(IReservationRepository):
                 for rs in reservation_orm.reserved_seats
             ],
         )
+
+    async def change_reservation_status(
+        self, reservation_id: int, user_id: int | None
+    ) -> bool:
+        stmt = update(ReservationORM)
+
+        if not user_id:
+            stmt = stmt.where(
+                ReservationORM.reservation_id == reservation_id,
+            )
+
+        else:
+            stmt = stmt.where(
+                ReservationORM.reservation_id == reservation_id,
+                ReservationORM.user_id == user_id,
+            )
+
+        stmt = stmt.values(status="cancelled").returning(ReservationORM.reservation_id)
+
+        reservation_id = await self._session.scalar(stmt)
+
+        return bool(reservation_id)
