@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
 
@@ -31,5 +32,7 @@ class GetScreeningResponse(BaseModel):
     screening_id: int
     movie: MovieResponse
     starts_at: datetime
+    ends_at: datetime
+    status: Literal["scheduled", "ongoing", "cancelled", "completed"]
     hall_name: str
     seats: list[SeatResponse]

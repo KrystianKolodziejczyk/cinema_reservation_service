@@ -28,5 +28,7 @@ class ScreeningDetailsDTO:
     screening_id: int
     movie: MovieData
     starts_at: datetime
+    ends_at: datetime
+    status: Literal["scheduled", "ongoing", "cancelled", "completed"]
     hall_name: str
     seats: list[SeatData]

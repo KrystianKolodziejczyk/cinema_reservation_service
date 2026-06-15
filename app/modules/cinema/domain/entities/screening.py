@@ -10,6 +10,7 @@ class Screening:
     movie_id: int
     hall_id: int
     starts_at: datetime
+    ends_at: datetime
     price_normal: int
     price_vip: int
     status: str

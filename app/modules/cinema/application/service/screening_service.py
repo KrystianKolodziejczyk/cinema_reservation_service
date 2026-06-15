@@ -1,4 +1,5 @@
 from dataclasses import asdict
+from datetime import timedelta
 
 from sqlalchemy.exc import IntegrityError
 
@@ -19,6 +20,7 @@ from app.modules.cinema.application.interface import IScreeningService
 from app.modules.cinema.domain.entities import Screening, ScreeningSeat
 from app.modules.cinema.infrastructure.interface import (
     IHallRepository,
+    IMovieRepository,
     IReservationHoldRepository,
     IScreeningRepository,
     IScreeningSeatRepository,
@@ -32,11 +34,13 @@ class ScreeningService(IScreeningService):
         hall_repository: IHallRepository,
         redis_repository: IReservationHoldRepository,
         screening_seat_repository: IScreeningSeatRepository,
+        movie_repository: IMovieRepository,
     ) -> None:
         self._screening_repository = screening_repository
         self._hall_repository = hall_repository
         self._redis_repository = redis_repository
         self._screening_seat_repository = screening_seat_repository
+        self._movie_repository = movie_repository
 
     def _user_role_check(self, user_role: str) -> None:
         if user_role != "admin":
@@ -45,12 +49,18 @@ class ScreeningService(IScreeningService):
     async def add_screening(self, dto: AddScreeningDTO, user_role: str) -> None:
         self._user_role_check(user_role=user_role)
 
+        try:
+            movie = await self._movie_repository.fetch_movie(movie_id=dto.movie_id)
+        except IntegrityError as e:
+            raise MovieNotFoundError(status_code=404, detail="Movie not found") from e
+
         screenings = [
             Screening(
                 screening_id=None,
                 movie_id=dto.movie_id,
                 hall_id=dto.hall_id,
                 starts_at=dto.starts_at[i],
+                ends_at=dto.starts_at[i] + timedelta(minutes=movie.duration),
                 price_normal=dto.price_normal,
                 price_vip=dto.price_vip,
                 status=dto.status,
@@ -102,13 +112,14 @@ class ScreeningService(IScreeningService):
         self, screening_id: int, dto: UpdateScreeningDTO, user_role: str
     ) -> None:
         self._user_role_check(user_role)
-        screening = await self._screening_repository.fetch_screening(
+
+        screening = await self._screening_repository.fetch_basic_screening(
             screening_id=screening_id
         )
-        screening.update_fields(**asdict(dto))
+        updated_screening = screening.update_fields(**asdict(dto))
 
         try:
-            await self._screening_repository.save_screening(screening=screening)
+            await self._screening_repository.save_screening(screening=updated_screening)
         except IntegrityError as e:
             if "movie_id" in str(e.orig):
                 raise MovieNotFoundError(
@@ -116,6 +127,7 @@ class ScreeningService(IScreeningService):
                 ) from e
             elif "hall_id" in str(e.orig):
                 raise HallNotFoundError(status_code=404, detail="Hall not found") from e
+            raise
 
     async def get_screening(self, screening_id: int) -> ScreeningDetailsDTO:
         screening_details = (

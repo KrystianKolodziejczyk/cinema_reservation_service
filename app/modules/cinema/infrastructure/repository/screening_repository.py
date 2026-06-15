@@ -89,6 +89,8 @@ class ScreeningRepository(IScreeningRepository):
                 rating=screening_orm.movie.rating,
             ),
             starts_at=screening_orm.starts_at,
+            ends_at=screening_orm.ends_at,
+            status=screening_orm.status,
             hall_name=screening_orm.hall.hall_name,
             seats=[
                 SeatData(

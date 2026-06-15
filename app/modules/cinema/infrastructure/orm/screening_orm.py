@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import CheckConstraint, ForeignKey, Index
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.modules.shared.database_conn.base_orm import Base
@@ -27,10 +27,11 @@ class ScreeningORM(Base):
     hall_id: Mapped[int] = mapped_column(
         ForeignKey("halls.hall_id", ondelete="CASCADE")
     )
-    starts_at: Mapped[datetime]
+    starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    ends_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     price_normal: Mapped[int]
     price_vip: Mapped[int]
-    status: Mapped[str]
+    _status: Mapped[str] = mapped_column("status", default="scheduled")
 
     movie: Mapped[MovieORM] = relationship(back_populates="screenings")
     hall: Mapped[HallORM] = relationship(back_populates="screenings")
@@ -41,11 +42,21 @@ class ScreeningORM(Base):
         back_populates="screening"
     )
 
+    @property
+    def status(self) -> str:
+        if self._status == "cancelled":
+            return "cancelled"
+        if self.starts_at > datetime.now(UTC):
+            return "scheduled"
+        if self.starts_at < datetime.now(UTC) < self.ends_at:
+            return "ongoing"
+        return "completed"
+
     __table_args__ = (
         Index("idx_movie_id", "movie_id"),
         Index("idx_hall_id", "hall_id"),
         CheckConstraint(
-            "status IN ('scheduled', 'ongoing', 'completed', 'canceled')",
+            "status IN ('scheduled', 'cancelled')",
             name="ck_screening_status",
         ),
     )

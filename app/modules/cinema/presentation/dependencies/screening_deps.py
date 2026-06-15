@@ -5,6 +5,7 @@ from app.modules.cinema.application.interface import IScreeningService
 from app.modules.cinema.application.service import ScreeningService
 from app.modules.cinema.infrastructure.repository import (
     HallRepository,
+    MovieRepository,
     ReservationHoldRepository,
     ScreeningRepository,
     ScreeningSeatRepository,
@@ -21,4 +22,5 @@ def get_screening_service(
         hall_repository=HallRepository(session=session),
         screening_seat_repository=ScreeningSeatRepository(session=session),
         redis_repository=ReservationHoldRepository(redis_client=redis_client),
+        movie_repository=MovieRepository(session=session),
     )
