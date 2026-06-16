@@ -2,9 +2,10 @@ from sqlalchemy.exc import IntegrityError
 
 from app.modules.cinema.application.dto import CreateReservationDTO, GetReservationDTO
 from app.modules.cinema.application.excpetions import (
-    CancelReservationError,
     PermissionDeniedError,
+    ReservationCancellationError,
     ReservationDataNotFoundError,
+    ReservationMismatchError,
     ReservationNotFoundError,
     ScreeningNotAvailableError,
 )
@@ -112,6 +113,16 @@ class ReservationService(IReservationService):
             await self._release_reservation_everywhere(reservation_id=reservation_id)
             return
 
+        screening = await self._screening_repository.get_screening_for_reservation(
+            reservation_id=reservation_id, user_id=user_data["user_id"]
+        )
+
+        if screening.status != "scheduled":
+            raise ReservationCancellationError(
+                status_code=409,
+                detail="Can not cancell reservation during or after screening",
+            )
+
         await self._release_reservation_everywhere(
             reservation_id=reservation_id, user_id=user_data["user_id"]
         )
@@ -125,7 +136,7 @@ class ReservationService(IReservationService):
             )
         )
         if not status_change_result:
-            raise CancelReservationError(
+            raise ReservationMismatchError(
                 status_code=409, detail="Wrong reservation_id or user_id"
             )
 

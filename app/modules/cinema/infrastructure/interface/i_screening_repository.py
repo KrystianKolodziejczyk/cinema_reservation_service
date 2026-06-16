@@ -26,3 +26,8 @@ class IScreeningRepository(ABC):
     async def fetch_seats_by_ids(
         self, screening_id: int, seat_ids: list[int]
     ) -> list[SeatHoldData]: ...
+
+    @abstractmethod
+    async def get_screening_for_reservation(
+        self, reservation_id: int, user_id: int
+    ) -> Screening: ...
