@@ -101,7 +101,7 @@ class ReservationRepository(IReservationRepository):
                 ReservationORM.user_id == user_id,
             )
 
-        stmt = stmt.values(status="cancelled").returning(ReservationORM.reservation_id)
+        stmt = stmt.values(_status="cancelled").returning(ReservationORM.reservation_id)
 
         reservation_id = await self._session.scalar(stmt)
 

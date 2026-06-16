@@ -45,10 +45,7 @@ class ReservationORM(Base):
     def status(self) -> str:
         if self._status == "cancelled":
             return "cancelled"
-        if (
-            self.screening is None
-            or self.screening.starts_at.timestamp() < datetime.now(tz=UTC).timestamp()
-        ):
+        if self.screening is None or self.screening.starts_at < datetime.now(tz=UTC):
             return "expired"
         return "confirmed"
 

@@ -6,12 +6,14 @@ from app.modules.cinema.application.excpetions import (
     PermissionDeniedError,
     ReservationDataNotFoundError,
     ReservationNotFoundError,
+    ScreeningNotAvailableError,
 )
 from app.modules.cinema.application.interface import IReservationService
 from app.modules.cinema.domain.entities import Reservation
 from app.modules.cinema.infrastructure.interface import (
     IReservationHoldRepository,
     IReservationRepository,
+    IScreeningRepository,
     IScreeningSeatRepository,
 )
 from app.modules.shared.exceptions import InvalidDataError
@@ -23,10 +25,12 @@ class ReservationService(IReservationService):
         reservation_repository: IReservationRepository,
         redis_repository: IReservationHoldRepository,
         screening_seat_repository: IScreeningSeatRepository,
+        screening_repository: IScreeningRepository,
     ) -> None:
         self._reservation_repository = reservation_repository
         self._redis_repository = redis_repository
         self._screening_seat_repository = screening_seat_repository
+        self._screening_repository = screening_repository
 
     async def create_reservation(self, user_id: int, dto: CreateReservationDTO) -> int:
         hold_data = await self._redis_repository.get_hold(
@@ -49,6 +53,15 @@ class ReservationService(IReservationService):
             total_price=hold_data.total_price,
             conf_code="example",
         )
+
+        screening = await self._screening_repository.fetch_basic_screening(
+            screening_id=reservation.screening_id
+        )
+
+        if screening.status in {"ongoing", "completed", "cancelled"}:
+            raise ScreeningNotAvailableError(
+                status_code=409, detail="Screening not available"
+            )
 
         try:
             reservation_id = await self._reservation_repository.save_reservation(

@@ -9,7 +9,7 @@ class ReservationMapper:
             reservation_id=reservation.reservation_id,
             user_id=reservation.user_id,
             screening_id=reservation.screening_id,
-            status=reservation.status,
+            _status=reservation.status,
             total_price=reservation.total_price,
             conf_code=reservation.conf_code,
         )

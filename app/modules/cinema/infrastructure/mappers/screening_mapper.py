@@ -13,7 +13,7 @@ class ScreeningMapper:
             ends_at=screening_orm.ends_at,
             price_normal=screening_orm.price_normal,
             price_vip=screening_orm.price_vip,
-            status=screening_orm._status,
+            status=screening_orm.status,
         )
 
     def to_orm(screening: Screening) -> ScreeningORM:
