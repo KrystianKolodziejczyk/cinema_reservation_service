@@ -14,6 +14,7 @@ from app.modules.cinema.infrastructure.interface import IScreeningRepository
 from app.modules.cinema.infrastructure.mappers import ScreeningMapper
 from app.modules.cinema.infrastructure.orm import (
     HallORM,
+    ReservationORM,
     ScreeningORM,
     ScreeningSeatORM,
     SeatORM,
@@ -89,9 +90,12 @@ class ScreeningRepository(IScreeningRepository):
                 rating=screening_orm.movie.rating,
             ),
             starts_at=screening_orm.starts_at,
+            ends_at=screening_orm.ends_at,
+            status=screening_orm.status,
             hall_name=screening_orm.hall.hall_name,
             seats=[
                 SeatData(
+                    seat_id=ss.seat.seat_id,
                     row=ss.seat.row,
                     number=ss.seat.number,
                     seat_type=ss.seat.seat_type,
@@ -135,3 +139,21 @@ class ScreeningRepository(IScreeningRepository):
             )
             for row in rows
         ]
+
+    async def get_screening_for_reservation(
+        self, reservation_id: int, user_id: int
+    ) -> Screening:
+        subq = (
+            select(ReservationORM.screening_id)
+            .where(
+                ReservationORM.reservation_id == reservation_id,
+                ReservationORM.user_id == user_id,
+            )
+            .scalar_subquery()
+        )
+
+        stmt = select(ScreeningORM).where(ScreeningORM.screening_id == subq)
+
+        screening_orm = await self._session.scalar(stmt)
+
+        return ScreeningMapper.to_entity(screening_orm)

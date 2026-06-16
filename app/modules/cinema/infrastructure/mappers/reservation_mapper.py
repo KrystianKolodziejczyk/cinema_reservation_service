@@ -9,9 +9,8 @@ class ReservationMapper:
             reservation_id=reservation.reservation_id,
             user_id=reservation.user_id,
             screening_id=reservation.screening_id,
-            status=reservation.status,
+            _status=reservation.status,
             total_price=reservation.total_price,
-            conf_code=reservation.conf_code,
         )
 
     def to_entity(reservation_orm: ReservationORM) -> Reservation:
@@ -21,5 +20,4 @@ class ReservationMapper:
             screening_id=reservation_orm.screening_id,
             status=reservation_orm.status,
             total_price=reservation_orm.total_price,
-            conf_code=reservation_orm.conf_code,
         )

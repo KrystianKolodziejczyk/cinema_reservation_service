@@ -11,5 +11,8 @@ class IScreeningSeatRepository(ABC):
 
     @abstractmethod
     async def set_seat_as_reserved(
-        self, reservation_id: int, seat_ids: list[int]
+        self, reservation_id: int, seat_ids: list[int], screening_id: int
     ) -> None: ...
+
+    @abstractmethod
+    async def release_screening_seats(self, reservation_id: int) -> None: ...

@@ -10,6 +10,7 @@ class ScreeningMapper:
             movie_id=screening_orm.movie_id,
             hall_id=screening_orm.hall_id,
             starts_at=screening_orm.starts_at,
+            ends_at=screening_orm.ends_at,
             price_normal=screening_orm.price_normal,
             price_vip=screening_orm.price_vip,
             status=screening_orm.status,
@@ -21,7 +22,8 @@ class ScreeningMapper:
             movie_id=screening.movie_id,
             hall_id=screening.hall_id,
             starts_at=screening.starts_at,
+            ends_at=screening.ends_at,
             price_normal=screening.price_normal,
             price_vip=screening.price_vip,
-            status=screening.status,
+            _cancelled=screening.status == "cancelled",
         )

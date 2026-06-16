@@ -1,7 +1,11 @@
 from .hall_not_found_error import HallNotFoundError
 from .movie_not_found_error import MovieNotFoundError
 from .permission_denied_error import PermissionDeniedError
+from .reservation_cancellation_error import ReservationCancellationError
 from .reservation_data_not_found_error import ReservationDataNotFoundError
+from .reservation_mismatch_error import ReservationMismatchError
+from .reservation_not_found_error import ReservationNotFoundError
+from .screening_not_available_error import ScreeningNotAvailableError
 from .screening_not_found_error import ScreeningNotFoundError
 from .seat_unavailable_error import SeatUnavailableError
 
@@ -12,4 +16,8 @@ __all__ = [
     "HallNotFoundError",
     "SeatUnavailableError",
     "ReservationDataNotFoundError",
+    "ReservationNotFoundError",
+    "ReservationMismatchError",
+    "ScreeningNotAvailableError",
+    "ReservationCancellationError",
 ]
