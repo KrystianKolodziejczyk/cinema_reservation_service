@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import CHAR, CheckConstraint, ForeignKey, Index, func
+from sqlalchemy import CheckConstraint, ForeignKey, Index, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.modules.shared.database_conn.base_orm import Base
@@ -29,7 +29,6 @@ class ReservationORM(Base):
     )
     _status: Mapped[str] = mapped_column("status", default="confirmed")
     total_price: Mapped[float]
-    conf_code: Mapped[str] = mapped_column(CHAR(15))
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     user: Mapped[UserORM] = relationship(back_populates="reservations")

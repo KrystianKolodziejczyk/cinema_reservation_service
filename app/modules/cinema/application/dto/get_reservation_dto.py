@@ -10,6 +10,5 @@ class GetReservationDTO:
     user_id: int
     status: Literal["pending", "confirmed", "cancelled", "expired"]
     total_price: int
-    conf_code: str
     screening: Screening
     seats: list[Seat]

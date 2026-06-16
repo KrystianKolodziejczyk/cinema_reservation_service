@@ -63,12 +63,12 @@ class ReservationRepository(IReservationRepository):
             user_id=reservation_orm.user_id,
             status=reservation_orm.status,
             total_price=reservation_orm.total_price,
-            conf_code=reservation_orm.conf_code,
             screening=Screening(
                 screening_id=reservation_orm.screening.screening_id,
                 movie_id=reservation_orm.screening.movie_id,
                 hall_id=reservation_orm.screening.hall_id,
                 starts_at=reservation_orm.screening.starts_at,
+                ends_at=reservation_orm.screening.ends_at,
                 price_normal=reservation_orm.screening.price_normal,
                 price_vip=reservation_orm.screening.price_vip,
                 status=reservation_orm.screening.status,

@@ -51,7 +51,6 @@ class ReservationService(IReservationService):
             screening_id=hold_data.screening_id,
             status="confirmed",
             total_price=hold_data.total_price,
-            conf_code="example",
         )
 
         screening = await self._screening_repository.fetch_basic_screening(
