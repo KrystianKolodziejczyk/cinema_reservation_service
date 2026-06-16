@@ -23,13 +23,14 @@ class ScreeningSeatRepository(IScreeningSeatRepository):
         await self._session.flush()
 
     async def set_seat_as_reserved(
-        self, reservation_id: int, seat_ids: list[int]
+        self, reservation_id: int, seat_ids: list[int], screening_id: int
     ) -> None:
         stmt = (
             update(ScreeningSeatORM)
             .where(
                 ScreeningSeatORM.reservation_id.is_(None)
-                & ScreeningSeatORM.seat_id.in_(seat_ids)
+                & ScreeningSeatORM.seat_id.in_(seat_ids),
+                ScreeningSeatORM.screening_id == screening_id,
             )
             .values(reservation_id=reservation_id, status="reserved")
         )

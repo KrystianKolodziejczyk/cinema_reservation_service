@@ -25,5 +25,5 @@ class ScreeningMapper:
             ends_at=screening.ends_at,
             price_normal=screening.price_normal,
             price_vip=screening.price_vip,
-            _status=screening.status,
+            _cancelled=screening.status == "cancelled",
         )

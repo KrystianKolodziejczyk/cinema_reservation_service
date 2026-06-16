@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index
+from sqlalchemy import DateTime, ForeignKey, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.modules.shared.database_conn.base_orm import Base
@@ -31,7 +31,7 @@ class ScreeningORM(Base):
     ends_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     price_normal: Mapped[int]
     price_vip: Mapped[int]
-    _status: Mapped[str] = mapped_column("status", default="scheduled")
+    _cancelled: Mapped[bool] = mapped_column("cancelled", default=False)
 
     movie: Mapped[MovieORM] = relationship(back_populates="screenings")
     hall: Mapped[HallORM] = relationship(back_populates="screenings")
@@ -44,7 +44,7 @@ class ScreeningORM(Base):
 
     @property
     def status(self) -> str:
-        if self._status == "cancelled":
+        if self._cancelled is True:
             return "cancelled"
         if self.starts_at > datetime.now(UTC):
             return "scheduled"
@@ -55,8 +55,4 @@ class ScreeningORM(Base):
     __table_args__ = (
         Index("idx_movie_id", "movie_id"),
         Index("idx_hall_id", "hall_id"),
-        CheckConstraint(
-            "status IN ('scheduled', 'cancelled')",
-            name="ck_screening_status",
-        ),
     )

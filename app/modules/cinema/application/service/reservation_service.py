@@ -77,12 +77,13 @@ class ReservationService(IReservationService):
         await self._screening_seat_repository.set_seat_as_reserved(
             reservation_id=reservation_id,
             seat_ids=[seat.seat_id for seat in hold_data.seats],
+            screening_id=reservation.screening_id,
         )
 
         await self._redis_repository.release(
             hold_id=hold_data.hold_id,
             user_id=user_id,
-            screening_id=hold_data.screening_id,
+            screening_id=reservation.screening_id,
         )
 
         return reservation_id
