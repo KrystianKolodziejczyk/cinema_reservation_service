@@ -132,3 +132,10 @@ class ReservationService(IReservationService):
         await self._screening_seat_repository.release_screening_seats(
             reservation_id=reservation_id
         )
+
+    async def get_reservation_history(
+        self, user_id: int
+    ) -> list[GetReservationDTO | None]:
+        return await self._reservation_repository.fetch_reservations_for_user(
+            user_id=user_id
+        )

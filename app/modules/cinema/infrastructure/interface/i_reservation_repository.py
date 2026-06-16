@@ -22,3 +22,8 @@ class IReservationRepository(ABC):
     async def change_reservation_status(
         self, reservation_id: int, user_id: int | None
     ) -> bool: ...
+
+    @abstractmethod
+    async def fetch_reservations_for_user(
+        self, user_id: int
+    ) -> list[GetReservationDTO | None]: ...

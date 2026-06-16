@@ -106,3 +106,49 @@ class ReservationRepository(IReservationRepository):
         reservation_id = await self._session.scalar(stmt)
 
         return bool(reservation_id)
+
+    async def fetch_reservations_for_user(
+        self, user_id: int
+    ) -> list[GetReservationDTO | None]:
+        stmt = (
+            select(ReservationORM)
+            .where(ReservationORM.user_id == user_id)
+            .options(
+                selectinload(ReservationORM.reserved_seats).selectinload(
+                    ReservedSeatORM.seat
+                ),
+                selectinload(ReservationORM.screening),
+            )
+        )
+
+        reservations_orm = (await self._session.scalars(stmt)).all()
+
+        return [
+            GetReservationDTO(
+                reservation_id=r_orm.reservation_id,
+                user_id=r_orm.user_id,
+                status=r_orm.status,
+                total_price=r_orm.total_price,
+                screening=Screening(
+                    screening_id=r_orm.screening.screening_id,
+                    movie_id=r_orm.screening.movie_id,
+                    hall_id=r_orm.screening.hall_id,
+                    starts_at=r_orm.screening.starts_at,
+                    ends_at=r_orm.screening.ends_at,
+                    price_normal=r_orm.screening.price_normal,
+                    price_vip=r_orm.screening.price_vip,
+                    status=r_orm.screening.status,
+                ),
+                seats=[
+                    Seat(
+                        seat_id=rs.seat.seat_id,
+                        hall_id=rs.seat.hall_id,
+                        row=rs.seat.row,
+                        number=rs.seat.number,
+                        seat_type=rs.seat.seat_type,
+                    )
+                    for rs in r_orm.reserved_seats
+                ],
+            )
+            for r_orm in reservations_orm
+        ]

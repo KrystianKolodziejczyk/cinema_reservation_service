@@ -31,7 +31,7 @@ class GetReservationResponse(BaseModel):
 
     reservation_id: int | None
     user_id: int
-    status: Literal["pending", "confirmed", "cancelled", "expired"]
+    status: Literal["confirmed", "cancelled", "expired"]
     total_price: int
     screening: ReservationScreeningResponse
     seats: list[ReservationSeatResponse]

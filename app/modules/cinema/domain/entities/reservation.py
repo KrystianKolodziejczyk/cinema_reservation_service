@@ -7,5 +7,5 @@ class Reservation:
     reservation_id: int | None
     user_id: int
     screening_id: int
-    status: Literal["pending", "confirmed", "cancelled", "expired"]
+    status: Literal["confirmed", "cancelled", "expired"]
     total_price: int
