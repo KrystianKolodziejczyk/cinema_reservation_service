@@ -7,3 +7,7 @@ redis_client = Redis(
     port=settings.redis_port,
     decode_responses=True,
 )
+
+
+def get_redis_client() -> Redis:
+    return redis_client

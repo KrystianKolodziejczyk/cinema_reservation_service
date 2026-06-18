@@ -10,6 +10,7 @@ from app.modules.auth.application.exceptions import (
     DuplicateEmailError,
     RefreshTokenExpiredError,
     RefreshTokenNotFoundError,
+    UserNotFoundError,
     WrongPasswordError,
 )
 from app.modules.auth.application.interface import IAuthService
@@ -108,6 +109,9 @@ class AuthService(IAuthService):
 
     async def login(self, dto: LoginDTO) -> dict[str, str]:
         user = await self._repository.fetch_user(email=dto.email)
+
+        if not user:
+            raise UserNotFoundError(status_code=404, detail="User not found")
 
         if not user.verify_password(raw_password=dto.password):
             raise WrongPasswordError(

@@ -8,7 +8,6 @@ from app.modules.cinema.application.dto import (
     SeatData,
     SeatHoldData,
 )
-from app.modules.cinema.application.excpetions import ScreeningNotFoundError
 from app.modules.cinema.domain.entities import Screening
 from app.modules.cinema.infrastructure.interface import IScreeningRepository
 from app.modules.cinema.infrastructure.mappers import ScreeningMapper
@@ -42,14 +41,12 @@ class ScreeningRepository(IScreeningRepository):
 
         return bool(await self._session.scalar(stmt))
 
-    async def fetch_basic_screening(self, screening_id: int) -> Screening:
+    async def fetch_basic_screening(self, screening_id: int) -> Screening | None:
         stmt = select(ScreeningORM).where(ScreeningORM.screening_id == screening_id)
         screening_orm = await self._session.scalar(stmt)
 
         if screening_orm is None:
-            raise ScreeningNotFoundError(
-                status_code=404, detail="Screening does not exist"
-            )
+            return None
 
         return ScreeningMapper.to_entity(screening_orm=screening_orm)
 
@@ -158,5 +155,8 @@ class ScreeningRepository(IScreeningRepository):
         stmt = select(ScreeningORM).where(ScreeningORM.screening_id == subq)
 
         screening_orm = await self._session.scalar(stmt)
+
+        if not screening_orm:
+            return None
 
         return ScreeningMapper.to_entity(screening_orm)

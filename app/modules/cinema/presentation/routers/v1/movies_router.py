@@ -75,8 +75,8 @@ async def delete_movie(
 )
 async def get_screenings_for_movie(
     movie_id: Annotated[int, Path(gt=0)],
-    date: Annotated[date | None, Query()],
     service: Annotated[IMovieService, Depends(get_movie_service)],
+    date: Annotated[date | None, Query()] = None,
 ) -> ScreeningDetailResponse:
     screenings = await service.get_screenings_for_movie(movie_id=movie_id, date=date)
     return ScreeningDetailResponse(**asdict(screenings))
