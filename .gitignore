@@ -155,6 +155,7 @@ celerybeat.pid
 
 # Environments
 .env
+.env.test
 .venv
 env/
 venv/
@@ -258,5 +259,7 @@ tags
 # Ignore all local history of files
 .history
 .ionide
+
+CLAUDE.md
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,vim,redis,venv,python,git,linux
