@@ -42,7 +42,7 @@ class MovieService(IMovieService):
     async def get_screenings_for_movie(
         self, movie_id: int, date: date | None
     ) -> list[ScreeningDetailsDTO]:
-        screenings = await self._repository.fetch_screening_for_movie(
+        screenings = await self._repository.fetch_screenings_for_movie(
             movie_id=movie_id, date=date
         )
 

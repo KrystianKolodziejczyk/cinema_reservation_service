@@ -60,7 +60,7 @@ class MovieRepository(IMovieRepository):
 
         return bool(await self._session.scalar(stmt))
 
-    async def fetch_screening_for_movie(self, movie_id: int, date: date | None):
+    async def fetch_screenings_for_movie(self, movie_id: int, date: date | None):
         stmt = text("""
             SELECT
                 screenings.screening_id, 
@@ -93,7 +93,7 @@ class MovieRepository(IMovieRepository):
                 ScreeningORM.starts_at < date + timedelta(days=1),
             )
         """
-        result = (await self._session.execute(stmt)).all()
+        result = (await self._session.execute(stmt, {"movie_id": movie_id})).all()
 
         if not result:
             return None

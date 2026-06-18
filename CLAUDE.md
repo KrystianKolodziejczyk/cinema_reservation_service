@@ -18,6 +18,7 @@ Testy tworzymy w lustrzanym odbiciu folderu `app/` w folderze `tests/`. Dodajemy
 - Fixture powtarzające się w 2+ miejscach → natychmiast przenieść do conftest właściwej warstwy.
 - Fixture współdzielone na wielu warstwach → globalny `tests/conftest.py`.
 - Callable fixtures: definiuj jako klasy duck-typing dziedziczące po `Protocol`, albo z nową składnią `type ClassName = Callable[[...], ...]`.
+- Funkcje pomocnicze zwracające gotowe obiekty z określonymi danymi (np. `make_service(...)`, `make_dto(...)`, `make_entity(...)`) traktuj od razu jako fixture — przenoś do conftest. Jeśli obiekt wymaga innych fixture'ów jako argumentów, zostaje fixture przyjmującym je z DI.
 
 ## Struktura conftest
 
@@ -43,19 +44,31 @@ Domain — nie potrzebuje conftest.
 - Globalne fixtures (engine, db_session, client) żyją w `tests/conftest.py`.
 - `engine` — scope session (tworzy/dropi tabele raz na całą sesję testową).
 - `db_session` — scope function (każdy test dostaje transakcję, rollback na koniec).
-- `client` — nadpisuje `get_session` dependency na aktywną `db_session`, żeby HTTP i repo dzieliły tę samą transakcję.
+- `client` — nadpisuje `get_session` dependency na aktywną `db_session`, żeby HTTP i repo dzieliły tę samą transakcję. Przed każdym testem woła `test_redis_client.flushdb()` — izolacja Redis analogiczna do rollbacku bazy.
 
 ## Typowanie parametrów testów
 
-Parametry testowych metod/funkcji typujemy zawsze **interfejsem**, nie konkretną implementacją:
+**Wszystkie** parametry metod testowych i funkcji testowych muszą być otyptowane. Dotyczy to fixture'ów wszelkiego rodzaju — nie tylko repozytoriów.
+
+Zasady:
+- Repozytoria: interfejs, nie konkretna klasa — `IMovieRepository`, nie `MovieRepository`.
+- Mocki: `AsyncMock` (lub inny typ mocka).
+- URL-e: `str`.
+- Payloady: `dict[str, str | int | float | None]` lub dokładniejszy typ jeśli znany.
+- Tokeny JWT: `str`.
+- Odpowiedzi/obiekty z fixture'ów tworzących zasoby: `dict` (lub bardziej szczegółowy jeśli znany).
+- Klient HTTP: `AsyncClient`.
 
 ```python
 # dobrze
-def test_foo(self, repo: IMovieRepository): ...
-async def test_bar(self, mock_repo: AsyncMock): ...  # AsyncMock(spec=IMovieRepository)
+async def test_foo(self, client: AsyncClient, movies_url: str, admin_token: str): ...
+async def test_bar(self, repo: IMovieRepository): ...
+async def test_baz(self, mock_repo: AsyncMock): ...
 
-# źle
-def test_foo(self, repo: MovieRepository): ...
+# źle — brak typów
+async def test_foo(self, client, movies_url, admin_token): ...
+# źle — konkretna klasa zamiast interfejsu
+async def test_bar(self, repo: MovieRepository): ...
 ```
 
 ## Konwencja repo / serwis
@@ -93,15 +106,24 @@ Jeśli przy pisaniu testu wykryty zostanie brakujący edge case (np. niezaimplem
 
 Testy implementujemy po kolei. Po każdej sesji odnotowujemy gdzie skończyliśmy, żeby móc kontynuować bez cofania się.
 
-**Status:** W toku.
+**Status:** Ukończone.
 
 ### Ukończone
 - `tests/modules/auth/presentation/test_auth_router.py` — E2E (10 testów)
 - `tests/modules/auth/infrastructure/test_auth_repository.py` — integracyjne (4 testy)
 - `tests/modules/auth/application/test_auth_service.py` — wyjątki (7 testów)
-
-### Następne
-- `tests/modules/cinema/` — bounded context cinema (movies, halls, screenings, reservations)
+- `tests/modules/cinema/presentation/test_movies_router.py` — E2E (10 testów)
+- `tests/modules/cinema/presentation/test_halls_router.py` — E2E (5 testów)
+- `tests/modules/cinema/presentation/test_screenings_router.py` — E2E (15 testów)
+- `tests/modules/cinema/presentation/test_reservations_router.py` — E2E (10 testów)
+- `tests/modules/cinema/infrastructure/test_movie_repository.py` — integracyjne (5 testów)
+- `tests/modules/cinema/infrastructure/test_hall_repository.py` — integracyjne (4 testy)
+- `tests/modules/cinema/infrastructure/test_screening_repository.py` — integracyjne (6 testów)
+- `tests/modules/cinema/infrastructure/test_reservation_repository.py` — integracyjne (4 testy)
+- `tests/modules/cinema/application/test_movie_service.py` — wyjątki (5 testów)
+- `tests/modules/cinema/application/test_hall_service.py` — wyjątki (3 testy)
+- `tests/modules/cinema/application/test_screening_service.py` — wyjątki (7 testów)
+- `tests/modules/cinema/application/test_reservation_service.py` — wyjątki (6 testów)
 
 ---
 

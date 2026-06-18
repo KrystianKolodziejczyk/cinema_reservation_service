@@ -1,4 +1,5 @@
 from fastapi import Depends
+from redis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.cinema.application.interface import IScreeningService
@@ -11,16 +12,17 @@ from app.modules.cinema.infrastructure.repository import (
     ScreeningSeatRepository,
 )
 from app.modules.shared.database_conn.database_client import get_session
-from app.modules.shared.database_conn.redis_client import redis_client
+from app.modules.shared.database_conn.redis_client import get_redis_client
 
 
 def get_screening_service(
     session: AsyncSession = Depends(get_session),
+    redis: Redis = Depends(get_redis_client),
 ) -> IScreeningService:
     return ScreeningService(
         screening_repository=ScreeningRepository(session=session),
         hall_repository=HallRepository(session=session),
         screening_seat_repository=ScreeningSeatRepository(session=session),
-        redis_repository=ReservationHoldRepository(redis_client=redis_client),
+        redis_repository=ReservationHoldRepository(redis_client=redis),
         movie_repository=MovieRepository(session=session),
     )
