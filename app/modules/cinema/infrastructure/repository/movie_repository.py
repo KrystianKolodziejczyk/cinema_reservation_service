@@ -1,6 +1,6 @@
 from datetime import date
 
-from sqlalchemy import delete, select, text
+from sqlalchemy import delete, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.cinema.application.dto import ScreeningDetailsDTO
@@ -15,17 +15,26 @@ class MovieRepository(IMovieRepository):
         self._session = session
 
     async def fetch_movies(
-        self, genre: str | None = None, title: str | None = None
-    ) -> list[Movie]:
-        stmt = select(MovieORM)
+        self,
+        genre: str | None = None,
+        title: str | None = None,
+        page: int = 1,
+        limit: int = 20,
+    ) -> tuple[list[Movie], int]:
+        filters = []
         if genre:
-            stmt = stmt.where(MovieORM.genre == genre)
+            filters.append(MovieORM.genre == genre)
         if title:
-            stmt = stmt.where(MovieORM.title.ilike(f"%{title}%"))
+            filters.append(MovieORM.title.ilike(f"%{title}%"))
 
+        total = await self._session.scalar(
+            select(func.count()).select_from(MovieORM).where(*filters)
+        )
+
+        stmt = select(MovieORM).where(*filters).limit(limit).offset((page - 1) * limit)
         result = await self._session.scalars(stmt)
 
-        return [MovieMapper.to_entity(movie_orm) for movie_orm in result]
+        return [MovieMapper.to_entity(movie_orm) for movie_orm in result], total
 
     async def fetch_movie(self, movie_id: int) -> Movie | None:
         stmt = select(MovieORM).where(MovieORM.movie_id == movie_id)
@@ -36,10 +45,11 @@ class MovieRepository(IMovieRepository):
 
         return MovieMapper.to_entity(movie_orm=movie_orm)
 
-    async def create_movie(self, movie: Movie) -> None:
+    async def create_movie(self, movie: Movie) -> int:
         movie_orm = MovieMapper.to_orm(movie)
         self._session.add(movie_orm)
         await self._session.flush()
+        return movie_orm.movie_id
 
     async def delete_movie(self, movie_id: int) -> bool:
         stmt = (

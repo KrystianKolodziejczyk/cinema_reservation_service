@@ -8,6 +8,7 @@ class SeatHoldData:
     row: int
     number: int
     price: int
+    seat_type: str
 
 
 @dataclass(frozen=True)

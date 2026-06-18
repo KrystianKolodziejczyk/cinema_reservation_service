@@ -1,9 +1,14 @@
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.modules.cinema.application.dto import GetReservationDTO, SeatHoldData
-from app.modules.cinema.domain.entities import Reservation, Screening
+from app.modules.cinema.application.dto import ReservationDTO, SeatHoldData
+from app.modules.cinema.application.dto.reservation_dto import (
+    ReservationHallDTO,
+    ReservationMovieDTO,
+    ReservationScreeningDTO,
+)
+from app.modules.cinema.domain.entities import Reservation
 from app.modules.cinema.domain.entities.seat import Seat
 from app.modules.cinema.infrastructure.interface import IReservationRepository
 from app.modules.cinema.infrastructure.mappers import (
@@ -13,6 +18,7 @@ from app.modules.cinema.infrastructure.orm import (
     ReservationORM,
     ReservedSeatORM,
 )
+from app.modules.cinema.infrastructure.orm.screening_orm import ScreeningORM
 
 
 class ReservationRepository(IReservationRepository):
@@ -41,7 +47,7 @@ class ReservationRepository(IReservationRepository):
         self._session.add_all(reserved_seats_orm)
         await self._session.flush()
 
-    async def fetch_reservation(self, reservation_id: int) -> GetReservationDTO | None:
+    async def fetch_reservation(self, reservation_id: int) -> ReservationDTO | None:
         stmt = (
             select(ReservationORM)
             .where(ReservationORM.reservation_id == reservation_id)
@@ -49,7 +55,8 @@ class ReservationRepository(IReservationRepository):
                 selectinload(ReservationORM.reserved_seats).selectinload(
                     ReservedSeatORM.seat
                 ),
-                selectinload(ReservationORM.screening),
+                selectinload(ReservationORM.screening).selectinload(ScreeningORM.movie),
+                selectinload(ReservationORM.screening).selectinload(ScreeningORM.hall),
             )
         )
 
@@ -58,20 +65,29 @@ class ReservationRepository(IReservationRepository):
         if reservation_orm is None:
             return None
 
-        return GetReservationDTO(
+        s = reservation_orm.screening
+        return ReservationDTO(
             reservation_id=reservation_orm.reservation_id,
             user_id=reservation_orm.user_id,
             status=reservation_orm.status,
             total_price=reservation_orm.total_price,
-            screening=Screening(
-                screening_id=reservation_orm.screening.screening_id,
-                movie_id=reservation_orm.screening.movie_id,
-                hall_id=reservation_orm.screening.hall_id,
-                starts_at=reservation_orm.screening.starts_at,
-                ends_at=reservation_orm.screening.ends_at,
-                price_normal=reservation_orm.screening.price_normal,
-                price_vip=reservation_orm.screening.price_vip,
-                status=reservation_orm.screening.status,
+            created_at=reservation_orm.created_at,
+            screening=ReservationScreeningDTO(
+                screening_id=s.screening_id,
+                starts_at=s.starts_at,
+                ends_at=s.ends_at,
+                status=s.status,
+                price_normal=s.price_normal,
+                price_vip=s.price_vip,
+                movie=ReservationMovieDTO(
+                    movie_id=s.movie.movie_id,
+                    title=s.movie.title,
+                    poster_url=s.movie.poster_url,
+                ),
+                hall=ReservationHallDTO(
+                    hall_id=s.hall.hall_id,
+                    hall_name=s.hall.hall_name,
+                ),
             ),
             seats=[
                 Seat(
@@ -108,8 +124,14 @@ class ReservationRepository(IReservationRepository):
         return bool(reservation_id)
 
     async def fetch_reservations_for_user(
-        self, user_id: int
-    ) -> list[GetReservationDTO | None]:
+        self, user_id: int, page: int = 1, limit: int = 20
+    ) -> tuple[list[ReservationDTO | None], int]:
+        total = await self._session.scalar(
+            select(func.count())
+            .select_from(ReservationORM)
+            .where(ReservationORM.user_id == user_id)
+        )
+
         stmt = (
             select(ReservationORM)
             .where(ReservationORM.user_id == user_id)
@@ -117,27 +139,38 @@ class ReservationRepository(IReservationRepository):
                 selectinload(ReservationORM.reserved_seats).selectinload(
                     ReservedSeatORM.seat
                 ),
-                selectinload(ReservationORM.screening),
+                selectinload(ReservationORM.screening).selectinload(ScreeningORM.movie),
+                selectinload(ReservationORM.screening).selectinload(ScreeningORM.hall),
             )
+            .limit(limit)
+            .offset((page - 1) * limit)
         )
 
         reservations_orm = (await self._session.scalars(stmt)).all()
 
-        return [
-            GetReservationDTO(
+        items = [
+            ReservationDTO(
                 reservation_id=r_orm.reservation_id,
                 user_id=r_orm.user_id,
                 status=r_orm.status,
                 total_price=r_orm.total_price,
-                screening=Screening(
+                created_at=r_orm.created_at,
+                screening=ReservationScreeningDTO(
                     screening_id=r_orm.screening.screening_id,
-                    movie_id=r_orm.screening.movie_id,
-                    hall_id=r_orm.screening.hall_id,
                     starts_at=r_orm.screening.starts_at,
                     ends_at=r_orm.screening.ends_at,
+                    status=r_orm.screening.status,
                     price_normal=r_orm.screening.price_normal,
                     price_vip=r_orm.screening.price_vip,
-                    status=r_orm.screening.status,
+                    movie=ReservationMovieDTO(
+                        movie_id=r_orm.screening.movie.movie_id,
+                        title=r_orm.screening.movie.title,
+                        poster_url=r_orm.screening.movie.poster_url,
+                    ),
+                    hall=ReservationHallDTO(
+                        hall_id=r_orm.screening.hall.hall_id,
+                        hall_name=r_orm.screening.hall.hall_name,
+                    ),
                 ),
                 seats=[
                     Seat(
@@ -152,3 +185,4 @@ class ReservationRepository(IReservationRepository):
             )
             for r_orm in reservations_orm
         ]
+        return items, total

@@ -40,7 +40,7 @@ class HallService(IHallService):
 
         return hall_seats
 
-    async def add_hall(self, dto: AddHallDTO, user_role: str) -> None:
+    async def add_hall(self, dto: AddHallDTO, user_role: str) -> int:
         self._user_role_check(user_role=user_role)
 
         hall = Hall(hall_id=None, **asdict(dto))
@@ -52,6 +52,8 @@ class HallService(IHallService):
         )
 
         await self._repository.fill_hall(seats=hall_seats)
+
+        return hall_id
 
     async def delete_hall(self, hall_id: int, user_role: str) -> None:
         self._user_role_check(user_role=user_role)

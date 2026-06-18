@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 
 
-class OneMovieResponse(BaseModel):
+class MovieDetailResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     movie_id: int
