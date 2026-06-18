@@ -7,6 +7,9 @@ requires-python = ">=3.14"
 dependencies = ["ruff", "fastapi", "sqlalchemy", "asyncpg", "pydantic", "postgres", "bcrypt", "pyjwt"]
 
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
 [tool.ruff.lint]
 select = [
     # pycodestyle

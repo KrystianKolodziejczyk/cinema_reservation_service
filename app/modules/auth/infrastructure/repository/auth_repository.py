@@ -30,9 +30,13 @@ class AuthRepository(IAuthRepository):
         self._session.add(refresh_token_orm)
         await self._session.flush()
 
-    async def fetch_user(self, email: str) -> User:
+    async def fetch_user(self, email: str) -> User | None:
         stmt = select(UserORM).where(UserORM.email == email)
         user_orm = await self._session.scalar(stmt)
+
+        if not user_orm:
+            return None
+
         return User(
             user_id=user_orm.user_id,
             email=user_orm.email,
