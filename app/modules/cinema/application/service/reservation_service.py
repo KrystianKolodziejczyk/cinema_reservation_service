@@ -58,6 +58,11 @@ class ReservationService(IReservationService):
             screening_id=reservation.screening_id
         )
 
+        if not screening:
+            raise ScreeningNotAvailableError(
+                status_code=404, detail="Screening not found"
+            )
+
         if screening.status in {"ongoing", "completed", "cancelled"}:
             raise ScreeningNotAvailableError(
                 status_code=409, detail="Screening not available"
@@ -118,6 +123,11 @@ class ReservationService(IReservationService):
         screening = await self._screening_repository.get_screening_for_reservation(
             reservation_id=reservation_id, user_id=user_data["user_id"]
         )
+
+        if not screening:
+            raise ReservationMismatchError(
+                status_code=409, detail="Wrong reservation_id or user_id"
+            )
 
         if screening.status != "scheduled":
             raise ReservationCancellationError(

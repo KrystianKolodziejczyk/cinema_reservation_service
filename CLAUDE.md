@@ -36,6 +36,39 @@ tests/
 
 Domain — nie potrzebuje conftest.
 
+## Konfiguracja testów
+
+- Środowisko testowe korzysta z pliku `.env.test` (lokalna baza, `localhost:8000`; nie Docker `db:5432`).
+- Załadowanie ustawień: `Settings(_env_file=".env.test")` — identyczny wzorzec jak w kodzie produkcyjnym (pydantic-settings). Nigdy nie używać `os.environ.setdefault` ani `load_dotenv` wprost.
+- Globalne fixtures (engine, db_session, client) żyją w `tests/conftest.py`.
+- `engine` — scope session (tworzy/dropi tabele raz na całą sesję testową).
+- `db_session` — scope function (każdy test dostaje transakcję, rollback na koniec).
+- `client` — nadpisuje `get_session` dependency na aktywną `db_session`, żeby HTTP i repo dzieliły tę samą transakcję.
+
+## Typowanie parametrów testów
+
+Parametry testowych metod/funkcji typujemy zawsze **interfejsem**, nie konkretną implementacją:
+
+```python
+# dobrze
+def test_foo(self, repo: IMovieRepository): ...
+async def test_bar(self, mock_repo: AsyncMock): ...  # AsyncMock(spec=IMovieRepository)
+
+# źle
+def test_foo(self, repo: MovieRepository): ...
+```
+
+## Konwencja repo / serwis
+
+Repozytorium jest **głupim magazynem** — nie podejmuje decyzji biznesowych:
+- Jeśli zasób istnieje → zwraca go.
+- Jeśli zasobu nie ma → zwraca `None`.
+- Nigdy nie raisuje `AppError` ani wyjątków domenowych.
+
+Serwis (warstwa aplikacyjna) **orkiestruje** i **podejmuje decyzje**:
+- Otrzymuje `None` od repo → raisuje odpowiedni wyjątek (`XxxNotFoundError`, itp.).
+- Sygnatura zwracanego typu w interfejsie repozytorium: `Entity | None`.
+
 ## Zasady pisania testów
 
 1. **YAGNI** — zero dodawania na zapas. Tylko to co aktualne.

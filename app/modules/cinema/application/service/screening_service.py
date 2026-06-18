@@ -118,6 +118,12 @@ class ScreeningService(IScreeningService):
         screening = await self._screening_repository.fetch_basic_screening(
             screening_id=screening_id
         )
+
+        if not screening:
+            raise ScreeningNotFoundError(
+                status_code=404, detail="Screening does not exist"
+            )
+
         updated_screening = screening.update_fields(**asdict(dto))
 
         try:
