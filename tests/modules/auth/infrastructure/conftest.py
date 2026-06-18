@@ -1,6 +1,6 @@
 import pytest
 
-from app.modules.auth.infrastructure.repository.auth_repository import AuthRepository
+from app.modules.auth.infrastructure.repository import AuthRepository
 
 
 @pytest.fixture

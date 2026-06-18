@@ -122,7 +122,10 @@ class TestGetReservationHistory:
 
         assert response.status_code == 200
         assert response.json()["total"] == 1
-        assert response.json()["reservations"][0]["reservation_id"] == created_reservation["reservation_id"]
+        assert (
+            response.json()["reservations"][0]["reservation_id"]
+            == created_reservation["reservation_id"]
+        )
 
 
 class TestCancelReservation:

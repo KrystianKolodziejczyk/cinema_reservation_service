@@ -5,7 +5,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.auth.domain.entities import User
 from app.modules.auth.infrastructure.repository import AuthRepository
-from app.modules.cinema.domain.entities import Hall, Movie, Screening, ScreeningSeat, Seat
+from app.modules.cinema.domain.entities import (
+    Hall,
+    Movie,
+    Screening,
+    ScreeningSeat,
+    Seat,
+)
 from app.modules.cinema.infrastructure.interface import (
     IHallRepository,
     IMovieRepository,
@@ -55,7 +61,10 @@ async def db_movie(movie_repository: IMovieRepository) -> Movie:
         poster_url=None,
     )
     movie_id = await movie_repository.create_movie(movie=movie)
-    return Movie(movie_id=movie_id, **{k: v for k, v in movie.__dict__.items() if k != "movie_id"})
+    return Movie(
+        movie_id=movie_id,
+        **{k: v for k, v in movie.__dict__.items() if k != "movie_id"},
+    )
 
 
 @pytest.fixture
@@ -68,7 +77,12 @@ async def db_hall(hall_repository: IHallRepository) -> Hall:
         for n in range(1, 5)
     ]
     await hall_repository.fill_hall(seats=seats)
-    return Hall(hall_id=hall_id, hall_name=hall.hall_name, rows=hall.rows, seats_per_row=hall.seats_per_row)
+    return Hall(
+        hall_id=hall_id,
+        hall_name=hall.hall_name,
+        rows=hall.rows,
+        seats_per_row=hall.seats_per_row,
+    )
 
 
 @pytest.fixture
@@ -108,14 +122,20 @@ async def db_screening(
         price_vip=35,
         status="scheduled",
     )
-    [screening_id] = await screening_repository.create_screenings(screenings=[screening])
+    [screening_id] = await screening_repository.create_screenings(
+        screenings=[screening]
+    )
 
     seat_ids = await hall_repository.fetch_seat_ids(hall_id=db_hall.hall_id)
     screening_seats = [
-        ScreeningSeat(screening_id=screening_id, seat_id=sid, reservation_id=None, status="free")
+        ScreeningSeat(
+            screening_id=screening_id, seat_id=sid, reservation_id=None, status="free"
+        )
         for sid in seat_ids
     ]
-    await screening_seat_repository.create_screening_seats(screening_seats=screening_seats)
+    await screening_seat_repository.create_screening_seats(
+        screening_seats=screening_seats
+    )
 
     return Screening(
         screening_id=screening_id,

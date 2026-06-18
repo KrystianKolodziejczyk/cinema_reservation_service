@@ -4,6 +4,7 @@ import pytest
 
 from app.modules.cinema.domain.entities import Hall, Movie, Screening, ScreeningSeat
 from app.modules.cinema.infrastructure.interface import (
+    IHallRepository,
     IScreeningRepository,
     IScreeningSeatRepository,
 )
@@ -29,8 +30,12 @@ class TestScreeningRepository:
             status="scheduled",
         )
 
-        [screening_id] = await screening_repository.create_screenings(screenings=[screening])
-        fetched = await screening_repository.fetch_basic_screening(screening_id=screening_id)
+        [screening_id] = await screening_repository.create_screenings(
+            screenings=[screening]
+        )
+        fetched = await screening_repository.fetch_basic_screening(
+            screening_id=screening_id
+        )
 
         assert fetched is not None
         assert fetched.screening_id == screening_id
@@ -61,14 +66,23 @@ class TestScreeningRepository:
             price_vip=30,
             status="scheduled",
         )
-        [screening_id] = await screening_repository.create_screenings(screenings=[screening])
+        [screening_id] = await screening_repository.create_screenings(
+            screenings=[screening]
+        )
 
         seat_ids = await hall_repository.fetch_seat_ids(hall_id=db_hall.hall_id)
         screening_seats = [
-            ScreeningSeat(screening_id=screening_id, seat_id=sid, reservation_id=None, status="free")
+            ScreeningSeat(
+                screening_id=screening_id,
+                seat_id=sid,
+                reservation_id=None,
+                status="free",
+            )
             for sid in seat_ids
         ]
-        await screening_seat_repository.create_screening_seats(screening_seats=screening_seats)
+        await screening_seat_repository.create_screening_seats(
+            screening_seats=screening_seats
+        )
 
         result = await screening_repository.fetch_screening_with_relations(
             screening_id=screening_id
@@ -104,7 +118,9 @@ class TestScreeningRepository:
             price_vip=30,
             status="scheduled",
         )
-        [screening_id] = await screening_repository.create_screenings(screenings=[screening])
+        [screening_id] = await screening_repository.create_screenings(
+            screenings=[screening]
+        )
 
         result = await screening_repository.delete_screening(screening_id=screening_id)
 

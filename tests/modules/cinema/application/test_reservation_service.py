@@ -2,9 +2,11 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from app.modules.cinema.application.dto import CreateReservationDTO
-from app.modules.cinema.application.dto.reservation_dto import ReservationDTO
-from app.modules.cinema.application.dto.reservation_hold_dto import HoldDTO
+from app.modules.cinema.application.dto import (
+    CreateReservationDTO,
+    HoldDTO,
+    ReservationDTO,
+)
 from app.modules.cinema.application.excpetions import (
     PermissionDeniedError,
     ReservationCancellationError,
@@ -13,7 +15,7 @@ from app.modules.cinema.application.excpetions import (
     ReservationNotFoundError,
     ScreeningNotAvailableError,
 )
-from app.modules.cinema.application.service.reservation_service import ReservationService
+from app.modules.cinema.application.service import ReservationService
 from app.modules.cinema.domain.entities import Screening
 
 pytestmark = pytest.mark.anyio
@@ -77,7 +79,9 @@ class TestReservationServiceExceptions:
         mock_screening_repository: AsyncMock,
         ongoing_screening: Screening,
     ):
-        mock_screening_repository.get_screening_for_reservation.return_value = ongoing_screening
+        mock_screening_repository.get_screening_for_reservation.return_value = (
+            ongoing_screening
+        )
 
         with pytest.raises(ReservationCancellationError):
             await reservation_service.cancel_reservation(

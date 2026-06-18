@@ -69,7 +69,11 @@ class TestGetMovie:
 
 class TestDeleteMovie:
     async def test_delete_movie_success(
-        self, client: AsyncClient, movies_url: str, created_movie: dict, admin_token: str
+        self,
+        client: AsyncClient,
+        movies_url: str,
+        created_movie: dict,
+        admin_token: str,
     ):
         movie_id = created_movie["movie_id"]
         response = await client.delete(
@@ -88,7 +92,11 @@ class TestDeleteMovie:
         assert response.status_code == 404
 
     async def test_delete_movie_permission_denied(
-        self, client: AsyncClient, movies_url: str, created_movie: dict, client_token: str
+        self,
+        client: AsyncClient,
+        movies_url: str,
+        created_movie: dict,
+        client_token: str,
     ):
         movie_id = created_movie["movie_id"]
         response = await client.delete(

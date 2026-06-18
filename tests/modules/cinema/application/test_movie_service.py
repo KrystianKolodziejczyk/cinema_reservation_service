@@ -8,7 +8,7 @@ from app.modules.cinema.application.excpetions import (
     PermissionDeniedError,
     ScreeningNotFoundError,
 )
-from app.modules.cinema.application.service.movie_service import MovieService
+from app.modules.cinema.application.service import MovieService
 
 pytestmark = pytest.mark.anyio
 

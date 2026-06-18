@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import pytest
 
 from app.modules.auth.domain.entities import RefreshToken, User
-from app.modules.auth.infrastructure.interface.i_auth_repository import IAuthRepository
+from app.modules.auth.infrastructure.interface import IAuthRepository
 
 pytestmark = pytest.mark.anyio
 
@@ -24,7 +24,9 @@ class TestAuthRepository:
         assert fetched._user_id == user_id
         assert fetched._email == "repo_test@example.com"
 
-    async def test_fetch_user_returns_none_when_not_found(self, auth_repository: IAuthRepository):
+    async def test_fetch_user_returns_none_when_not_found(
+        self, auth_repository: IAuthRepository
+    ):
         result = await auth_repository.fetch_user(email="nobody@example.com")
 
         assert result is None
@@ -47,7 +49,9 @@ class TestAuthRepository:
         )
         await auth_repository.save_refresh_token(refresh_token=token)
 
-        fetched = await auth_repository.fetch_refresh_token(user_id=user_id, token="test_hash_abc123")
+        fetched = await auth_repository.fetch_refresh_token(
+            user_id=user_id, token="test_hash_abc123"
+        )
         assert fetched is not None
         assert fetched.token_hash == "test_hash_abc123"
         assert fetched.user_id == user_id
@@ -70,10 +74,14 @@ class TestAuthRepository:
         )
         await auth_repository.save_refresh_token(refresh_token=token)
 
-        saved = await auth_repository.fetch_refresh_token(user_id=user_id, token="delete_hash_xyz")
+        saved = await auth_repository.fetch_refresh_token(
+            user_id=user_id, token="delete_hash_xyz"
+        )
         await auth_repository.delete_refresh_token(
             user_id=user_id, refresh_token_id=saved.refresh_token_id
         )
 
-        result = await auth_repository.fetch_refresh_token(user_id=user_id, token="delete_hash_xyz")
+        result = await auth_repository.fetch_refresh_token(
+            user_id=user_id, token="delete_hash_xyz"
+        )
         assert result is None

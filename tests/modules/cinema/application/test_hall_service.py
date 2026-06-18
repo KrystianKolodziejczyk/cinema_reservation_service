@@ -3,8 +3,11 @@ from unittest.mock import AsyncMock
 import pytest
 
 from app.modules.cinema.application.dto import AddHallDTO
-from app.modules.cinema.application.excpetions import HallNotFoundError, PermissionDeniedError
-from app.modules.cinema.application.service.hall_service import HallService
+from app.modules.cinema.application.excpetions import (
+    HallNotFoundError,
+    PermissionDeniedError,
+)
+from app.modules.cinema.application.service import HallService
 
 pytestmark = pytest.mark.anyio
 

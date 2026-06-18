@@ -3,17 +3,21 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from app.modules.cinema.application.dto import AddScreeningDTO, ScreeningDetailsDTO
-from app.modules.cinema.application.dto.screening_details_dto import MovieData
-from app.modules.cinema.application.service.screening_service import ScreeningService
-from app.modules.cinema.application.dto.reservation_dto import (
+from app.modules.cinema.application.dto import (
+    AddScreeningDTO,
+    HoldDTO,
+    MovieData,
     ReservationDTO,
     ReservationHallDTO,
     ReservationMovieDTO,
     ReservationScreeningDTO,
+    ScreeningDetailsDTO,
+    SeatHoldData,
 )
-from app.modules.cinema.application.dto.reservation_hold_dto import HoldDTO, SeatHoldData
-from app.modules.cinema.application.service.reservation_service import ReservationService
+from app.modules.cinema.application.service import (
+    ReservationService,
+    ScreeningService,
+)
 from app.modules.cinema.domain.entities import Screening
 from app.modules.cinema.infrastructure.interface import (
     IHallRepository,

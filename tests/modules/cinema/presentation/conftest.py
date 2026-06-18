@@ -79,7 +79,9 @@ def screenings_url() -> str:
 
 
 @pytest.fixture
-async def screening_payload(created_movie: dict, created_hall: dict) -> dict[str, str | int | list]:
+async def screening_payload(
+    created_movie: dict, created_hall: dict
+) -> dict[str, str | int | list]:
     return {
         "movie_id": created_movie["movie_id"],
         "hall_id": created_hall["hall_id"],
@@ -100,7 +102,9 @@ async def created_screening(
 
 
 @pytest.fixture
-async def ongoing_screening_payload(created_movie: dict, created_hall: dict) -> dict[str, str | int | list]:
+async def ongoing_screening_payload(
+    created_movie: dict, created_hall: dict
+) -> dict[str, str | int | list]:
     starts_at = (datetime.now() - timedelta(minutes=30)).isoformat()
     return {
         "movie_id": created_movie["movie_id"],
@@ -117,7 +121,7 @@ def reservations_url() -> str:
 
 
 @pytest.fixture
-async def registered_client_token(client: "AsyncClient") -> str:
+async def registered_client_token(client: AsyncClient) -> str:
     response = await client.post(
         "/api/v1/auth/register",
         json={
@@ -132,7 +136,7 @@ async def registered_client_token(client: "AsyncClient") -> str:
 
 
 @pytest.fixture
-async def second_client_token(client: "AsyncClient") -> str:
+async def second_client_token(client: AsyncClient) -> str:
     response = await client.post(
         "/api/v1/auth/register",
         json={
@@ -148,7 +152,7 @@ async def second_client_token(client: "AsyncClient") -> str:
 
 @pytest.fixture
 async def active_hold(
-    client: "AsyncClient",
+    client: AsyncClient,
     screenings_url: str,
     created_screening: dict,
     registered_client_token: str,
@@ -167,14 +171,17 @@ async def active_hold(
 
 @pytest.fixture
 async def created_reservation(
-    client: "AsyncClient",
+    client: AsyncClient,
     reservations_url: str,
     active_hold: dict,
     registered_client_token: str,
 ) -> dict:
     response = await client.post(
         reservations_url,
-        json={"hold_id": active_hold["hold_id"], "screening_id": active_hold["screening_id"]},
+        json={
+            "hold_id": active_hold["hold_id"],
+            "screening_id": active_hold["screening_id"],
+        },
         headers={"Authorization": registered_client_token},
     )
     return response.json()

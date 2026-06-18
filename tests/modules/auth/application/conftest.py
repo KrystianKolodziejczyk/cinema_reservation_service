@@ -1,7 +1,8 @@
-import pytest
 from unittest.mock import AsyncMock
 
-from app.modules.auth.infrastructure.interface.i_auth_repository import IAuthRepository
+import pytest
+
+from app.modules.auth.infrastructure.interface import IAuthRepository
 
 
 @pytest.fixture

@@ -21,8 +21,12 @@ class TestReservationRepository:
             total_price=25,
         )
 
-        reservation_id = await reservation_repository.save_reservation(reservation=reservation)
-        fetched = await reservation_repository.fetch_reservation(reservation_id=reservation_id)
+        reservation_id = await reservation_repository.save_reservation(
+            reservation=reservation
+        )
+        fetched = await reservation_repository.fetch_reservation(
+            reservation_id=reservation_id
+        )
 
         assert fetched is not None
         assert fetched.reservation_id == reservation_id
@@ -48,7 +52,9 @@ class TestReservationRepository:
             status="confirmed",
             total_price=25,
         )
-        reservation_id = await reservation_repository.save_reservation(reservation=reservation)
+        reservation_id = await reservation_repository.save_reservation(
+            reservation=reservation
+        )
 
         result = await reservation_repository.change_reservation_status(
             reservation_id=reservation_id, user_id=db_user
@@ -71,7 +77,9 @@ class TestReservationRepository:
         )
         await reservation_repository.save_reservation(reservation=reservation)
 
-        items, total = await reservation_repository.fetch_reservations_for_user(user_id=db_user)
+        items, total = await reservation_repository.fetch_reservations_for_user(
+            user_id=db_user
+        )
 
         assert total == 1
         assert len(items) == 1

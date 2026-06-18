@@ -58,7 +58,11 @@ class TestGetScreening:
 
 class TestUpdateScreening:
     async def test_update_screening_success(
-        self, client: AsyncClient, screenings_url: str, created_screening: dict, admin_token: str
+        self,
+        client: AsyncClient,
+        screenings_url: str,
+        created_screening: dict,
+        admin_token: str,
     ):
         screening_id = created_screening["screening_ids"][0]
         response = await client.put(
@@ -81,7 +85,11 @@ class TestUpdateScreening:
         assert response.status_code == 404
 
     async def test_update_screening_permission_denied(
-        self, client: AsyncClient, screenings_url: str, created_screening: dict, client_token: str
+        self,
+        client: AsyncClient,
+        screenings_url: str,
+        created_screening: dict,
+        client_token: str,
     ):
         screening_id = created_screening["screening_ids"][0]
         response = await client.put(
@@ -95,7 +103,11 @@ class TestUpdateScreening:
 
 class TestDeleteScreening:
     async def test_delete_screening_success(
-        self, client: AsyncClient, screenings_url: str, created_screening: dict, admin_token: str
+        self,
+        client: AsyncClient,
+        screenings_url: str,
+        created_screening: dict,
+        admin_token: str,
     ):
         screening_id = created_screening["screening_ids"][0]
         response = await client.delete(
@@ -114,7 +126,11 @@ class TestDeleteScreening:
         assert response.status_code == 404
 
     async def test_delete_screening_permission_denied(
-        self, client: AsyncClient, screenings_url: str, created_screening: dict, client_token: str
+        self,
+        client: AsyncClient,
+        screenings_url: str,
+        created_screening: dict,
+        client_token: str,
     ):
         screening_id = created_screening["screening_ids"][0]
         response = await client.delete(

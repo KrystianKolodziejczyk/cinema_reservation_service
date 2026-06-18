@@ -33,7 +33,9 @@ class TestMovieRepository:
 
         assert result is None
 
-    async def test_fetch_movies_with_genre_filter(self, movie_repository: IMovieRepository):
+    async def test_fetch_movies_with_genre_filter(
+        self, movie_repository: IMovieRepository
+    ):
         movie = Movie(
             movie_id=None,
             title="The Dark Knight",

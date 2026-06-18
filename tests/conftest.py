@@ -37,7 +37,9 @@ async def engine():
 
 @pytest.fixture
 async def db_session(engine):
-    session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    session_factory = async_sessionmaker(
+        engine, class_=AsyncSession, expire_on_commit=False
+    )
     session = session_factory()
     await session.begin()
     yield session
@@ -56,6 +58,8 @@ async def client(db_session):
     test_redis_client.flushdb()
     app.dependency_overrides[get_session] = _override_get_session
     app.dependency_overrides[get_redis_client] = _override_get_redis_client
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", follow_redirects=True) as ac:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test", follow_redirects=True
+    ) as ac:
         yield ac
     app.dependency_overrides.clear()

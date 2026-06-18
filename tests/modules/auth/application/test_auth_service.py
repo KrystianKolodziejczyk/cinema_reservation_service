@@ -13,7 +13,7 @@ from app.modules.auth.application.exceptions import (
     UserNotFoundError,
     WrongPasswordError,
 )
-from app.modules.auth.application.service.auth_service import AuthService
+from app.modules.auth.application.service import AuthService
 from app.modules.auth.domain.entities import RefreshToken, User
 from app.modules.shared.exceptions import InvalidTokenError
 
@@ -35,7 +35,9 @@ class TestAuthServiceExceptions:
             await service.register_user(dto=dto)
 
     async def test_raises_duplicate_email_error(self, mock_repository: AsyncMock):
-        mock_repository.save_user.side_effect = IntegrityError(None, None, Exception("unique constraint"))
+        mock_repository.save_user.side_effect = IntegrityError(
+            None, None, Exception("unique constraint")
+        )
         service = AuthService(repository=mock_repository)
         dto = RegisterUserDTO(
             email="test@example.com",
@@ -78,7 +80,9 @@ class TestAuthServiceExceptions:
         with pytest.raises(InvalidTokenError):
             await service.logout("not.a.valid.jwt.token")
 
-    async def test_raises_refresh_token_not_found_error(self, mock_repository: AsyncMock):
+    async def test_raises_refresh_token_not_found_error(
+        self, mock_repository: AsyncMock
+    ):
         mock_repository.fetch_refresh_token.return_value = None
         service = AuthService(repository=mock_repository)
         token, _ = service._create_refresh_token(user_id=1, role="client")
