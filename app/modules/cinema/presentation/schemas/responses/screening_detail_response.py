@@ -4,18 +4,20 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict
 
 
-class MovieResponse(BaseModel):
+class ScreeningMovieResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+    movie_id: int
     title: str
     description: str
     director: str
     duration: int
     genre: str
     rating: float
+    poster_url: str | None
 
 
-class SeatResponse(BaseModel):
+class ScreeningSeatResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     seat_id: int
@@ -26,13 +28,13 @@ class SeatResponse(BaseModel):
     price: int
 
 
-class GetScreeningResponse(BaseModel):
+class ScreeningDetailResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     screening_id: int
-    movie: MovieResponse
+    movie: ScreeningMovieResponse
     starts_at: datetime
     ends_at: datetime
     status: Literal["scheduled", "ongoing", "cancelled", "completed"]
     hall_name: str
-    seats: list[SeatResponse]
+    seats: list[ScreeningSeatResponse]

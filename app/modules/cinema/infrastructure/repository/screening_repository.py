@@ -82,12 +82,14 @@ class ScreeningRepository(IScreeningRepository):
         return ScreeningDetailsDTO(
             screening_id=screening_orm.screening_id,
             movie=MovieData(
+                movie_id=screening_orm.movie.movie_id,
                 title=screening_orm.movie.title,
                 description=screening_orm.movie.description,
                 director=screening_orm.movie.director,
                 duration=screening_orm.movie.duration,
                 genre=screening_orm.movie.genre,
                 rating=screening_orm.movie.rating,
+                poster_url=screening_orm.movie.poster_url,
             ),
             starts_at=screening_orm.starts_at,
             ends_at=screening_orm.ends_at,
@@ -136,6 +138,7 @@ class ScreeningRepository(IScreeningRepository):
                 row=row.row,
                 number=row.number,
                 price=row.price_normal if row.seat_type == "normal" else row.price_vip,
+                seat_type=row.seat_type,
             )
             for row in rows
         ]

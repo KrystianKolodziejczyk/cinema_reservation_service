@@ -1,17 +1,16 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path, status
+from fastapi import APIRouter, Depends, Path, Query, status
 
-from app.modules.cinema.application.dto.create_reservation_dto import (
+from app.modules.cinema.application.dto import (
     CreateReservationDTO,
 )
 from app.modules.cinema.application.interface import IReservationService
 from app.modules.cinema.presentation.dependencies import get_reservation_service
 from app.modules.cinema.presentation.schemas.request import CreateReservationRequest
 from app.modules.cinema.presentation.schemas.responses import (
-    CreateReservationResponse,
-    GetReservationHisotryResponse,
-    GetReservationResponse,
+    ReservationHistoryResponse,
+    ReservationResponse,
 )
 from app.modules.shared.dependencies.auth_deps import get_current_user
 
@@ -22,48 +21,52 @@ router = APIRouter(prefix="/v1/reservations")
 
 
 @router.post(
-    "/", status_code=status.HTTP_201_CREATED, response_model=CreateReservationResponse
+    "/", status_code=status.HTTP_201_CREATED, response_model=ReservationResponse
 )
 async def create_reservation(
     body: CreateReservationRequest,
     user_data: Annotated[dict, Depends(get_current_user)],
     service: Annotated[IReservationService, Depends(get_reservation_service)],
-) -> CreateReservationResponse:
+) -> ReservationResponse:
     dto = CreateReservationDTO(**body.model_dump())
-    reservation_id = await service.create_reservation(
+    reservation = await service.create_reservation(
         user_id=user_data["user_id"], dto=dto
     )
-
-    return CreateReservationResponse.model_validate({"reservation_id": reservation_id})
+    return ReservationResponse.model_validate(reservation)
 
 
 @router.get(
-    "/me", status_code=status.HTTP_200_OK, response_model=GetReservationHisotryResponse
+    "/me", status_code=status.HTTP_200_OK, response_model=ReservationHistoryResponse
 )
 async def get_reservation_history(
     user_data: Annotated[dict, Depends(get_current_user)],
     service: Annotated[IReservationService, Depends(get_reservation_service)],
-) -> GetReservationHisotryResponse:
-    reservations = await service.get_reservation_history(user_id=user_data["user_id"])
-
-    return GetReservationHisotryResponse.model_validate({"reservations": reservations})
+    page: Annotated[int, Query(ge=1)] = 1,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+) -> ReservationHistoryResponse:
+    reservations, total = await service.get_reservation_history(
+        user_id=user_data["user_id"], page=page, limit=limit
+    )
+    return ReservationHistoryResponse.model_validate(
+        {"reservations": reservations, "total": total, "page": page, "limit": limit}
+    )
 
 
 @router.get(
     "/{reservation_id}",
     status_code=status.HTTP_200_OK,
-    response_model=GetReservationResponse,
+    response_model=ReservationResponse,
 )
 async def get_reservation(
     reservation_id: Annotated[int, Path(gt=0)],
     user_data: Annotated[dict, Depends(get_current_user)],
     service: Annotated[IReservationService, Depends(get_reservation_service)],
-) -> GetReservationResponse:
+) -> ReservationResponse:
     reservation_details = await service.get_reservation(
         reservation_id=reservation_id, user_data=user_data
     )
 
-    return GetReservationResponse.model_validate(reservation_details)
+    return ReservationResponse.model_validate(reservation_details)
 
 
 @router.put("/{reservation_id}", status_code=status.HTTP_204_NO_CONTENT)

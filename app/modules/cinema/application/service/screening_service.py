@@ -46,7 +46,7 @@ class ScreeningService(IScreeningService):
         if user_role != "admin":
             raise PermissionDeniedError(status_code=403, detail="Permision denied")
 
-    async def add_screening(self, dto: AddScreeningDTO, user_role: str) -> None:
+    async def add_screening(self, dto: AddScreeningDTO, user_role: str) -> list[int]:
         self._user_role_check(user_role=user_role)
 
         try:
@@ -97,6 +97,8 @@ class ScreeningService(IScreeningService):
         await self._screening_seat_repository.create_screening_seats(
             screening_seats=screening_seats
         )
+
+        return screening_ids
 
     async def delete_screening(self, screening_id: int, user_role: str) -> None:
         self._user_role_check(user_role)

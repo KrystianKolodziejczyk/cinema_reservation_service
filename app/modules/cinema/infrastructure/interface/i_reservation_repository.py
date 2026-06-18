@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from app.modules.cinema.application.dto import GetReservationDTO, SeatHoldData
+from app.modules.cinema.application.dto import ReservationDTO, SeatHoldData
 from app.modules.cinema.domain.entities import Reservation
 
 
@@ -16,7 +16,7 @@ class IReservationRepository(ABC):
     @abstractmethod
     async def fetch_reservation(
         self, reservation_id: int
-    ) -> GetReservationDTO | None: ...
+    ) -> ReservationDTO | None: ...
 
     @abstractmethod
     async def change_reservation_status(
@@ -25,5 +25,5 @@ class IReservationRepository(ABC):
 
     @abstractmethod
     async def fetch_reservations_for_user(
-        self, user_id: int
-    ) -> list[GetReservationDTO | None]: ...
+        self, user_id: int, page: int = 1, limit: int = 20
+    ) -> tuple[list[ReservationDTO | None], int]: ...

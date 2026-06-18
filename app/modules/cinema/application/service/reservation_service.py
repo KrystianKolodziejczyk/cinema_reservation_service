@@ -1,6 +1,6 @@
 from sqlalchemy.exc import IntegrityError
 
-from app.modules.cinema.application.dto import CreateReservationDTO, GetReservationDTO
+from app.modules.cinema.application.dto import CreateReservationDTO, ReservationDTO
 from app.modules.cinema.application.excpetions import (
     PermissionDeniedError,
     ReservationCancellationError,
@@ -86,11 +86,13 @@ class ReservationService(IReservationService):
             screening_id=reservation.screening_id,
         )
 
-        return reservation_id
+        return await self._reservation_repository.fetch_reservation(
+            reservation_id=reservation_id
+        )
 
     async def get_reservation(
         self, reservation_id: int, user_data: dict[str, str | int]
-    ) -> GetReservationDTO:
+    ) -> ReservationDTO:
         reservation_details = await self._reservation_repository.fetch_reservation(
             reservation_id=reservation_id
         )
@@ -145,8 +147,8 @@ class ReservationService(IReservationService):
         )
 
     async def get_reservation_history(
-        self, user_id: int
-    ) -> list[GetReservationDTO | None]:
+        self, user_id: int, page: int = 1, limit: int = 20
+    ) -> tuple[list[ReservationDTO | None], int]:
         return await self._reservation_repository.fetch_reservations_for_user(
-            user_id=user_id
+            user_id=user_id, page=page, limit=limit
         )

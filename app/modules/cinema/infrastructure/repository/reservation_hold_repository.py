@@ -37,6 +37,7 @@ class ReservationHoldRepository(IReservationHoldRepository):
                         "row": s.row,
                         "number": s.number,
                         "price": s.price,
+                        "seat_type": s.seat_type,
                     }
                     for s in seats_data
                 ],
@@ -77,6 +78,7 @@ class ReservationHoldRepository(IReservationHoldRepository):
                     row=s["row"],
                     number=s["number"],
                     price=s["price"],
+                    seat_type=s["seat_type"],
                 )
                 for s in data["seats"]
             ],

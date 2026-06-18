@@ -21,9 +21,15 @@ class MovieService(IMovieService):
             raise PermissionDeniedError(status_code=403, detail="Permission denied")
 
     async def get_movies(
-        self, genre: str | None = None, title: str | None = None
-    ) -> list[Movie]:
-        return await self._repository.fetch_movies(genre=genre, title=title)
+        self,
+        genre: str | None = None,
+        title: str | None = None,
+        page: int = 1,
+        limit: int = 20,
+    ) -> tuple[list[Movie], int]:
+        return await self._repository.fetch_movies(
+            genre=genre, title=title, page=page, limit=limit
+        )
 
     async def get_movie(self, movie_id: int) -> Movie:
         result = await self._repository.fetch_movie(movie_id=movie_id)
@@ -47,11 +53,11 @@ class MovieService(IMovieService):
 
         return screenings
 
-    async def add_movie(self, dto: AddMovieDTO, user_role: str) -> None:
+    async def add_movie(self, dto: AddMovieDTO, user_role: str) -> int:
         self._user_role_check(user_role=user_role)
         movie = Movie(movie_id=None, **asdict(dto))
 
-        await self._repository.create_movie(movie=movie)
+        return await self._repository.create_movie(movie=movie)
 
     async def delete_movie(self, movie_id: int, user_role: str) -> None:
         self._user_role_check(user_role=user_role)

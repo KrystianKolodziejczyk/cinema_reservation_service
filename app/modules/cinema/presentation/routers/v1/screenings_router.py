@@ -11,8 +11,9 @@ from app.modules.cinema.presentation.schemas.request import (
     UpdateScreeningRequest,
 )
 from app.modules.cinema.presentation.schemas.responses import (
-    GetScreeningResponse,
+    AddScreeningResponse,
     HoldSeatsResponse,
+    ScreeningDetailResponse,
 )
 from app.modules.shared.dependencies.auth_deps import get_current_user
 
@@ -21,14 +22,15 @@ router = APIRouter(prefix="/v1/screenings")
 # ===============
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=AddScreeningResponse)
 async def add_screening(
     body: AddScreeningRequest,
     user_data: Annotated[dict, Depends(get_current_user)],
     service: Annotated[IScreeningService, Depends(get_screening_service)],
-) -> None:
+) -> AddScreeningResponse:
     dto = AddScreeningDTO(**body.model_dump())
-    await service.add_screening(dto=dto, user_role=user_data["role"])
+    screening_ids = await service.add_screening(dto=dto, user_role=user_data["role"])
+    return AddScreeningResponse(screening_ids=screening_ids)
 
 
 @router.delete("/{screening_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -58,14 +60,14 @@ async def update_screening(
 @router.get(
     "/{screening_id}",
     status_code=status.HTTP_200_OK,
-    response_model=GetScreeningResponse,
+    response_model=ScreeningDetailResponse,
 )
 async def get_screening(
     screening_id: int,
     service: Annotated[IScreeningService, Depends(get_screening_service)],
-) -> GetScreeningResponse:
+) -> ScreeningDetailResponse:
     screening_details = await service.get_screening(screening_id=screening_id)
-    return GetScreeningResponse.model_validate(screening_details)
+    return ScreeningDetailResponse.model_validate(screening_details)
 
 
 @router.post(

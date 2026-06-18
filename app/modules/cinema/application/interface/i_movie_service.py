@@ -8,8 +8,12 @@ from app.modules.cinema.domain.entities.movie import Movie
 class IMovieService(ABC):
     @abstractmethod
     async def get_movies(
-        self, genre: str | None = None, title: str | None = None
-    ) -> list[Movie]: ...
+        self,
+        genre: str | None = None,
+        title: str | None = None,
+        page: int = 1,
+        limit: int = 20,
+    ) -> tuple[list[Movie], int]: ...
 
     @abstractmethod
     async def get_movie(self, movie_id: int) -> Movie: ...
@@ -20,7 +24,7 @@ class IMovieService(ABC):
     ) -> list[ScreeningDetailsDTO]: ...
 
     @abstractmethod
-    async def add_movie(self, dto: AddMovieDTO, user_role: str) -> None: ...
+    async def add_movie(self, dto: AddMovieDTO, user_role: str) -> int: ...
 
     @abstractmethod
     async def delete_movie(self, movie_id: int, user_role: str) -> None: ...

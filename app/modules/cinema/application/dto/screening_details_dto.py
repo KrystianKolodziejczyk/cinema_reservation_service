@@ -5,12 +5,14 @@ from typing import Literal
 
 @dataclass(frozen=True)
 class MovieData:
+    movie_id: int
     title: str
     description: str
     director: str
     duration: int
     genre: str
     rating: float
+    poster_url: str | None
 
 
 @dataclass(frozen=True)

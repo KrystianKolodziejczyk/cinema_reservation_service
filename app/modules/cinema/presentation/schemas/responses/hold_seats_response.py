@@ -8,6 +8,7 @@ class SeatHoldResponse(BaseModel):
     row: int
     number: int
     price: int
+    seat_type: str
 
 
 class HoldSeatsResponse(BaseModel):
